@@ -115,47 +115,74 @@ D.b5=()=>{
   c.note(.2,.19,.5,.85,'LIP C DROPS INSIDE THE RIM');c.text(.5,1.2,'.025 CLEAR EACH SIDE','dt','start');
   return svg(1020,500,'B5 folded aluminum tray: flat pattern and lid section',[fp,c])};
 
-/* Three-quarter (isometric) sample views. x right-back, y left-front, z up; faces at x-max, y-max and z-max face the viewer. */
-const MAT={wood:['wd','wd2','wd3'],alu:['al3','al','al2'],acr:['ac','ac2','ac3'],dark:['cav','cav','cav'],pr:['pr','pr2','pr3']};
+/* Three-quarter (isometric) sample views, built from real parts. x runs right-back, y left-front, z up.
+   Faces at x-max, y-max and z-max face the viewer. Parts are sorted back to front before drawing. */
+const MAT={wood:['wd','wd2','wd3'],floor:['wdf','wd2','wd3'],alu:['al3','al','al2'],acr:['ac','ac2','ac3'],pr:['pr','pr2','pr3']};
 function ISO(s=40){
-  const o=[],c=Math.cos(Math.PI/6),b={x0:1e9,y0:1e9,x1:-1e9,y1:-1e9};
+  const o=[],c=Math.cos(Math.PI/6),b={x0:1e9,y0:1e9,x1:-1e9,y1:-1e9},parts=[];
   const P=(x,y,z)=>{const X=+((x-y)*c*s).toFixed(1),Y=+(((x+y)*.5-z)*s).toFixed(1);b.x0=Math.min(b.x0,X);b.x1=Math.max(b.x1,X);b.y0=Math.min(b.y0,Y);b.y1=Math.max(b.y1,Y);return [X,Y]};
   const a={o,b,P,
     poly(pts,cls){o.push(`<polygon points="${pts.map(p=>P(...p).join(',')).join(' ')}" class="${cls}"/>`)},
-    box(x0,y0,z0,dx,dy,dz,m){const x1=x0+dx,y1=y0+dy,z1=z0+dz,[t,f,r]=MAT[m];
-      a.poly([[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],f);a.poly([[x1,y0,z0],[x1,y1,z0],[x1,y1,z1],[x1,y0,z1]],r);a.poly([[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]],t)},
     top(x0,x1,y0,y1,z,cls){a.poly([[x0,y0,z],[x1,y0,z],[x1,y1,z],[x0,y1,z]],cls)},
     yf(x0,x1,z0,z1,y,cls){a.poly([[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]],cls)},
     xf(y0,y1,z0,z1,x,cls){a.poly([[x,y0,z0],[x,y1,z0],[x,y1,z1],[x,y0,z1]],cls)},
     circ(cx,cy,r,z,cls){const p=[];for(let k=0;k<24;k++){const t=k/24*2*Math.PI;p.push([cx+r*Math.cos(t),cy+r*Math.sin(t),z])}a.poly(p,cls)},
     cyl(cx,cy,r,z0,h,cls){const p=[];for(let k=0;k<=12;k++){const t=-Math.PI/4+k/12*Math.PI;p.push([cx+r*Math.cos(t),cy+r*Math.sin(t),z0])}for(let k=12;k>=0;k--){const t=-Math.PI/4+k/12*Math.PI;p.push([cx+r*Math.cos(t),cy+r*Math.sin(t),z0+h])}a.poly(p,cls+'2');a.circ(cx,cy,r,z0+h,cls)},
     line(p,q,cls){const A=P(...p),B=P(...q);o.push(`<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" class="${cls}"/>`)},
-    fingersY(x0,w,z0,z1,y,p){for(let z=z0,i=0;z<z1-1e-6;z+=p,i++)if(i%2===0)a.yf(x0,x0+w,z,Math.min(z+p,z1),y,'wd3')},
-    fingersX(y0,w,z0,z1,x,p){for(let z=z0,i=0;z<z1-1e-6;z+=p,i++)if(i%2===1)a.xf(y0,y0+w,z,Math.min(z+p,z1),x,'wd3')}
+    // a solid part; deco(v) draws details on its visible faces right after it
+    part(x0,y0,z0,x1,y1,z1,m,deco){parts.push({x0,y0,z0,x1,y1,z1,m,deco});return a},
+    render(){
+      const e=1e-6,behind=(A,B)=>A.x1<=B.x0+e||A.y1<=B.y0+e||A.z1<=B.z0+e;
+      const n=parts.length,inn=new Array(n).fill(0),out=parts.map(()=>[]);
+      for(let i=0;i<n;i++)for(let j=0;j<n;j++)if(i!==j&&behind(parts[i],parts[j])&&!behind(parts[j],parts[i])){out[i].push(j);inn[j]++}
+      const q=[],order=[];for(let i=0;i<n;i++)if(!inn[i])q.push(i);
+      while(q.length){q.sort((i,j)=>i-j);const i=q.shift();order.push(i);out[i].forEach(j=>{if(--inn[j]===0)q.push(j)})}
+      if(order.length<n)parts.forEach((_,i)=>{if(!order.includes(i))order.push(i)});
+      order.forEach(i=>{const p=parts[i],[t,f,r]=MAT[p.m];
+        a.poly([[p.x0,p.y1,p.z0],[p.x1,p.y1,p.z0],[p.x1,p.y1,p.z1],[p.x0,p.y1,p.z1]],f);
+        a.poly([[p.x1,p.y0,p.z0],[p.x1,p.y1,p.z0],[p.x1,p.y1,p.z1],[p.x1,p.y0,p.z1]],r);
+        a.poly([[p.x0,p.y0,p.z1],[p.x1,p.y0,p.z1],[p.x1,p.y1,p.z1],[p.x0,p.y1,p.z1]],t);
+        if(p.deco)p.deco(a,p)});
+      return a}
   };return a}
-function isoSvg(v,label){const p=14,b=v.b;return `<svg viewBox="${b.x0-p} ${b.y0-p} ${b.x1-b.x0+2*p} ${b.y1-b.y0+2*p}" role="img" aria-label="${label}">${v.o.join('')}</svg>`}
+function isoSvg(v,label){v.render();const p=14,b=v.b;return `<svg viewBox="${b.x0-p} ${b.y0-p} ${b.x1-b.x0+2*p} ${b.y1-b.y0+2*p}" role="img" aria-label="${label}">${v.o.join('')}</svg>`}
+const fingersOnY=(x0,w,z0,z1,y,step,start)=>v=>{for(let z=z0,i=0;z<z1-1e-6;z+=step,i++)if(i%2===start)v.yf(x0,x0+w,z,Math.min(z+step,z1),y,'wd3')};
 const D3={};
-D3.b1=()=>{const v=ISO();v.box(0,0,0,8,3,2.25,'wood');v.top(.25,7.875,.25,2.75,2.25,'cav');
-  v.fingersY(0,.125,0,2.25,3,.25);v.fingersX(2.875,.125,0,2.25,8,.25);
-  v.box(2.3,.14,2.0,7.85,2.72,.125,'acr');v.top(3.3,9.3,.5,2.5,2.125,'eng');
-  return isoSvg(v,'B1 laser pencil box, lid sliding out')};
-D3.b2=()=>{const v=ISO();v.box(0,0,0,9,3,2.5,'wood');v.top(.5,8.5,.5,2.5,2.5,'cav');
-  v.line([9,.5,0],[9,.5,2.5],'thin');v.line([9,2.5,0],[9,2.5,2.125],'thin');
-  v.box(2.3,.33,2.125,8.66,2.34,.125,'acr');
-  return isoSvg(v,'B2 router-table pencil box, lid sliding out')};
-D3.b3=()=>{const v=ISO();v.box(0,0,0,5.5,3.5,3.5,'wood');v.yf(.625,4.875,.875,2.875,3.5,'cav');
-  v.line([0,3.5,1.875],[.625,3.5,1.875],'thin');
-  v.box(.625,1.85,.875,4.25,3.25,2,'wood');v.top(1.0,4.5,2.225,4.725,2.875,'cav');
-  v.box(2.0,5.1,1.6875,1.5,.25,.375,'alu');
-  return isoSvg(v,'B3 bandsaw box, drawer pulled out')};
-D3.b4=()=>{const v=ISO();v.box(0,0,0,6,4,2.375,'wood');v.fingersY(0,.125,0,2.375,4,.25);v.fingersX(3.875,.125,0,2.375,6,.25);
-  v.box(0,0,2.375,6,4,.125,'alu');const z=2.5;
-  v.top(.75,3.25,.75,1.75,z,'cav');[[.375,.375],[5.625,.375],[.375,3.625],[5.625,3.625]].forEach(([x,y])=>v.circ(x,y,.09,z,'kn'));
-  v.cyl(4.5,1.25,.38,z,.45,'pr');v.circ(2.75,2.9,.1,z,'led');
-  [1.25,2].forEach(x=>{v.circ(x,2.9,.16,z,'kn');v.line([x,2.9,z],[x,3.15,z+.45],'lever')});
+D3.b1=()=>{const v=ISO(),L=8,W=3,H=2.25,t=.125,s0=1.87,s1=2.0;
+  v.part(t,t,0,L-t,W-t,t,'floor')                                        // bottom
+   .part(0,0,0,L,t,H,'wood').part(t,t,t,L-t,2*t,s0,'wood').part(t,t,s1,L-t,2*t,H,'wood')            // back wall: outer, inner lower, inner cap
+   .part(0,t,0,t,W-t,H,'wood')                                           // closed end
+   .part(L-t,t,0,L,W-t,s0,'wood')                                        // lid-exit end, top at the slot
+   .part(t,W-2*t,t,L-t,W-t,s0,'wood').part(t,W-2*t,s1,L-t,W-t,H,'wood')  // front inner lower + cap
+   .part(0,W-t,0,L,W,H,'wood',fingersOnY(0,t,0,H,W,.25,0))               // front outer
+   .part(2.6,t+.015,s0,L,W-t-.015,s0+.125,'acr')                         // lid, inside the slot
+   .part(L,t+.015,s0,10.45,W-t-.015,s0+.125,'acr',v=>v.top(L+.15,10.2,.6,2.4,s0+.125,'eng'));  // lid, slid out past the end
+  return isoSvg(v,'B1 laser pencil box with the acrylic lid partly slid out')};
+D3.b2=()=>{const v=ISO(),L=9,W=3,H=2.5,t=.5,g0=2.125,g1=2.25;
+  v.part(t,t,0,L-t,W-t,.25,'floor')
+   .part(0,0,0,L,t,H,'wood')
+   .part(0,t,0,t,W-t,H,'wood')
+   .part(L-t,t,0,L,W-t,g0,'wood')
+   .part(0,W-t,0,L,W,H,'wood')
+   .part(2.3,t,g0,L,W-t,g1,'acr')
+   .part(L,.33,g0,10.95,W-.33,g1,'acr');
+  return isoSvg(v,'B2 router-table pencil box with the lid partly slid out')};
+D3.b3=()=>{const v=ISO(),L=5.5,D=3.5,H=3.5,x0=.625,x1=4.875,z0=.875,z1=2.875,out=1.4,w=.375;
+  v.part(0,0,0,x0,D,H,'wood',v=>v.line([0,D,1.875],[x0,D,1.875],'thin'))     // left of the opening, with the glued entry kerf
+   .part(x1,0,0,L,D,H,'wood',v=>v.line([L,.25,0],[L,.25,H],'thin'))         // right of the opening, back slice line
+   .part(x0,0,0,x1,D,z0,'wood').part(x0,0,z1,x1,D,H,'wood').part(x0,0,z0,x1,.25,z1,'wood');
+  const y0=.25+out,y1=D+out;                                                  // drawer pulled out
+  v.part(x0,y0,z0,x1,y1,z0+w,'floor').part(x0,y0,z0+w,x1,y0+w,z1,'wood').part(x0,y0+w,z0+w,x0+w,y1-w,z1,'wood')
+   .part(x1-w,y0+w,z0+w,x1,y1-w,z1,'wood').part(x0,y1-w,z0+w,x1,y1,z1,'wood')
+   .part(2.0,y1,1.69,3.5,y1+.25,2.06,'alu');
+  return isoSvg(v,'B3 bandsaw box with the drawer pulled out')};
+D3.b4=()=>{const v=ISO(),z=2.5;
+  v.part(0,0,0,6,4,2.375,'wood',v=>{fingersOnY(0,.125,0,2.375,4,.25,0)(v);v.xf(3.875,4,0,.25,6,'wd3');v.xf(3.875,4,.5,.75,6,'wd3');v.xf(3.875,4,1,1.25,6,'wd3');v.xf(3.875,4,1.5,1.75,6,'wd3');v.xf(3.875,4,2,2.25,6,'wd3')})
+   .part(0,0,2.375,6,4,z,'alu',v=>{v.top(.75,3.25,.75,1.75,z,'cav');[[.375,.375],[5.625,.375],[.375,3.625],[5.625,3.625]].forEach(([x,y])=>v.circ(x,y,.09,z,'kn'));
+     v.circ(2.75,2.9,.1,z,'led');[1.25,2].forEach(x=>{v.circ(x,2.9,.16,z,'kn');v.line([x,2.9,z],[x,3.15,z+.45],'lever')});v.cyl(4.5,1.25,.38,z,.45,'pr')});
   return isoSvg(v,'B4 instrument-panel box')};
-D3.b5=()=>{const v=ISO(),L=5.25,W=3.375,H=1.5,t=.125;
-  v.top(0,L,0,W,H,'al3');v.top(t,L-t,t,W-t,H,'cav');v.yf(t,L-t,t,H,t,'al');v.xf(t,W-t,t,H,t,'al2');
-  v.yf(0,L,0,H,W,'al');v.xf(0,W,0,H,L,'al2');
-  v.box(.15,.15,2.35,4.95,3.075,.125,'wood');v.box(0,0,2.475,L,W,.125,'wood');
-  return isoSvg(v,'B5 folded aluminum tray, lid lifted')};
+D3.b5=()=>{const v=ISO(),L=5.25,W=3.375,H=1.5,t=.125,lz=2.4;
+  v.part(0,0,0,L,W,t,'alu')
+   .part(0,0,t,L,t,H,'alu').part(0,t,t,t,W-t,H,'alu').part(L-t,t,t,L,W-t,H,'alu').part(0,W-t,t,L,W,H,'alu')
+   .part(.15,.15,lz,L-.15,W-.15,lz+.125,'wood').part(0,0,lz+.125,L,W,lz+.25,'wood');
+  return isoSvg(v,'B5 folded aluminum tray with the plywood lid lifted')};

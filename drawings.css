@@ -29,3 +29,4 @@
 .pr{fill:var(--print);stroke:var(--ink);stroke-width:1}.pr2{fill:var(--print2);stroke:var(--ink);stroke-width:1}.pr3{fill:var(--print2);stroke:var(--ink);stroke-width:1}
 .led{fill:var(--red);stroke:var(--ink);stroke-width:.8}
 .lever{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.wdf{fill:var(--wood2);stroke:var(--ink);stroke-width:.8}
