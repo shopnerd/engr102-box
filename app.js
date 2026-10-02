@@ -141,7 +141,7 @@ function wire(a, b){
       e.preventDefault();
       const cad = $('#pk1').value, fun = $('#pk2').value, out = $('#pkout');
       if (!cad || !fun) { out.textContent = 'Answer both questions first.'; return; }
-      const pick = { laser:'b6', wood:'b3', metal:'b5', mix:'b4' }[fun], d = DESIGNS.find(x => x.id === pick);
+      const pick = { laser:'b1', wood:'b3', metal:'b5', mix:'b4' }[fun], d = DESIGNS.find(x => x.id === pick);
       out.innerHTML = cad === 'y'
         ? `Design your own. Borrow ideas from <a href="#/design/${pick}">${esc(d.name)}</a>, then read <a href="#/lesson/cad">Designing your own</a>.`
         : `Start from <a href="#/design/${pick}">${pick.toUpperCase()} ${esc(d.name)}</a> and make it yours.`;
