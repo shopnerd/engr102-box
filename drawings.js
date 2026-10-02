@@ -108,18 +108,23 @@ D.b3=()=>{
 D.b4=()=>{
   const p=V(90,115,70);p.title(0,-1.05,'TOP VIEW, PLATE');
   p.rect(0,0,6,4,'al',.06);p.rect(.75,.75,2.5,1,'holeF',.06);p.text(2,1.33,'W1','hlab');
-  const H=[['H1',.375,.375,.075],['H2',5.625,.375,.075],['H3',.375,3.625,.075],['H4',5.625,3.625,.075],['H5',4.5,1.25,.1405],['H6',1.25,2.9,.125],['H7',2,2.9,.125],['H8',2.75,2.9,.0985]];
+  const H=[['H1',.375,.375,.067],['H2',5.625,.375,.067],['H3',.375,3.625,.067],['H4',5.625,3.625,.067],['H5',4.5,1.25,.1405],['H6',1.25,2.9,.125],['H7',2,2.9,.125],['H8',2.75,2.9,.0985]];
   H.forEach(([id,x,y,r])=>{p.circ(x,y,r,'holeF');p.cross(x,y,r+.13);p.text(x+r+.1,y-r-.06,id,'hlab','start')});
   p.text(-.08,-.1,'0,0','dt','end');p.dimH(0,6,4,4.45,'6.00');p.dimV(0,4,0,-.55,'4.00');
   const v=V(615,115,55);v.title(0,-1.05,'FRONT VIEW');
-  v.rect(0,.125,6,2.375,'wd');v.rect(0,0,6,.125,'al');fingers(v,0,.125,2.5,.125,.25);fingers(v,5.875,.125,2.5,.125,.25);
-  v.rect(.125,.125,.75,2.25,'hid');v.rect(5.125,.125,.75,2.25,'hid');v.line(.125,2.375,5.875,2.375,'hid');
-  [.375,5.625].forEach(x=>{v.line(x-.04,0,x-.04,.65,'hid');v.line(x+.04,0,x+.04,.65,'hid')});
+  v.rect(0,.125,6,2.375,'pr');v.rect(0,0,6,.125,'al');
+  v.line(.08,.125,.08,2.42,'hid');v.line(5.92,.125,5.92,2.42,'hid');v.line(.08,2.42,5.92,2.42,'hid');
+  [.375,5.625].forEach(x=>{v.rect(x-.14,.125,.28,2.3,'hid');v.rect(x-.09,.125,.18,.22,'hid');v.line(x-.033,-.05,x-.033,.32,'hid');v.line(x+.033,-.05,x+.033,.32,'hid')});
   v.rect(1.05,.125,.4,.55,'hid');v.rect(1.8,.125,.4,.55,'hid');v.rect(4.25,.125,.5,.4,'hid');
   v.rect(4.15,-.55,.7,.55,'kn',.06);v.line(1.25,0,1.33,-.42,'ol');v.line(2,0,2.08,-.42,'ol');
   v.dimV(0,2.5,6,6.45,'2.50');v.dimH(0,6,2.5,2.9,'6.00');v.note(3.1,.06,3.3,-.8,'PLATE .125 6061, WATERJET');
-  v.balloon(3.1,1.4,3.1,1.4,'B');v.balloon(.5,1.6,-.45,1.6,'C');
-  return svg(1020,450,'B4 instrument-panel box: plate top view and front view',[p,v])};
+  v.note(5.625,1.2,4.3,3.35,'PRINTED CORNER BOSS, 4×');v.balloon(3.1,1.4,3.1,1.4,'B');
+  const d=V(640,365,70);d.title(0,-.55,'DETAIL C, INSERT AND SCREW');
+  d.secRect(0,.18,1.1,.125,'al');d.secRect(.25,.305,.6,.9,'pr');
+  d.rect(.46,.305,.18,.22,'kn');[.33,.39,.45].forEach(y=>d.line(.46,y,.64,y,'thin'));
+  d.rect(.517,.06,.066,.42,'ol');d.rect(.45,.03,.2,.15,'ol',.03);d.line(.55,-.1,.55,1.3,'ctr');
+  d.note(.64,.4,1.25,.55,'M3 HEAT-SET BRASS INSERT');d.note(.62,.1,1.25,.15,'M3 × 8 BUTTON HEAD');d.note(.85,.9,1.25,.95,'PLA BOSS (BOX STUDIO)');d.note(1.0,.24,1.25,-.25,'PLATE, Ø.134 CLEARANCE');
+  return svg(1020,470,'B4 instrument-panel box: plate top view, front view with printed base, insert detail',[p,v,d])};
 
 /* B5 blank: 1/8 1100-O, r ≈ t, bend deduction .225. Tabs on the end walls fold inward and are riveted inside the long walls. */
 const B5=(()=>{
@@ -194,10 +199,10 @@ D3.b1=()=>{const v=ISO(),L=8,W=3,H=2.25,t=.125,s0=1.87,s1=2.0;
    .part(L,t+.015,s0,10.45,W-t-.015,s0+.125,'acr',v=>v.top(L+.15,10.2,.6,2.4,s0+.125,'eng'));  // lid, slid out past the end
   return isoSvg(v,'B1 laser pencil box with the acrylic lid partly slid out')};
 D3.b4=()=>{const v=ISO(),z=2.5;
-  v.part(0,0,0,6,4,2.375,'wood',v=>{fingersOnY(0,.125,0,2.375,4,.25,0)(v);v.xf(3.875,4,0,.25,6,'wd3');v.xf(3.875,4,.5,.75,6,'wd3');v.xf(3.875,4,1,1.25,6,'wd3');v.xf(3.875,4,1.5,1.75,6,'wd3');v.xf(3.875,4,2,2.25,6,'wd3')})
-   .part(0,0,2.375,6,4,z,'alu',v=>{v.top(.75,3.25,.75,1.75,z,'cav');[[.375,.375],[5.625,.375],[.375,3.625],[5.625,3.625]].forEach(([x,y])=>v.circ(x,y,.09,z,'kn'));
-     v.circ(2.75,2.9,.1,z,'led');[1.25,2].forEach(x=>{v.circ(x,2.9,.16,z,'kn');v.line([x,2.9,z],[x,3.15,z+.45],'lever')});v.cyl(4.5,1.25,.38,z,.45,'pr')});
-  return isoSvg(v,'B4 instrument-panel box')};
+  v.part(0,0,0,6,4,2.375,'pr',v=>{v.line([0,4,.6],[6,4,.6],'layer');v.line([0,4,1.2],[6,4,1.2],'layer');v.line([0,4,1.8],[6,4,1.8],'layer')})
+   .part(0,0,2.375,6,4,z,'alu',v=>{v.top(.75,3.25,.75,1.75,z,'cav');[[.375,.375],[5.625,.375],[.375,3.625],[5.625,3.625]].forEach(([x,y])=>v.circ(x,y,.11,z,'screw'));
+     v.circ(2.75,2.9,.1,z,'led');[1.25,2].forEach(x=>{v.circ(x,2.9,.16,z,'kn');v.line([x,2.9,z],[x,3.15,z+.45],'lever')});v.cyl(4.5,1.25,.38,z,.45,'kn')});
+  return isoSvg(v,'B4 instrument-panel box with a 3D printed base and aluminum top plate')};
 /* Extruded profiles for curved parts (bandsaw box). Profile [x,z] CCW, extruded along y from y0 to y1. */
 let ISO_ID=0;
 const area2=p=>p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a[0]*b[1]-b[0]*a[1]},0);

@@ -68,6 +68,7 @@ const LESSONS = [
 <tr><td>Bandsaw</td><td>The bandsaw box, curves in wood</td><td>You, after training</td></tr>
 <tr><td>Router table</td><td>The lid groove and bottom dado in the router box</td><td>You, after training</td></tr>
 <tr><td>Finger brake</td><td>Folding aluminum</td><td>You, after a staff demo</td></tr>
+<tr><td>Insert iron</td><td>Heat-set inserts in a printed base</td><td>You, after a staff or 3D print lab demo</td></tr>
 <tr><td>3D printer</td><td>One printed part</td><td><b>No training needed.</b> Send a request. 3D print lab workers print it for you. See <a href="#/lesson/print">3D printing</a>.</td></tr>
 <tr><td>Waterjet</td><td>Aluminum parts</td><td><b>Staff only.</b> You submit a DXF.</td></tr>
 <tr><td>Table saw, chop saw</td><td>Pre-cutting solid wood</td><td><b>Staff only.</b></td></tr>
@@ -109,7 +110,7 @@ const LESSONS = [
 <div class="tw"><table>
 <tr><th>Tool</th><th>Good for</th></tr>
 <tr><td><a href="#/tools/box">Laser box designer</a></td><td>Finger-jointed laser boxes from a few numbers. Built into this guide. Gives a DXF and SVG with the material outline included.</td></tr>
-<tr><td><a href="${SITE.boxStudio}" target="_blank" rel="noopener">Box Studio</a></td><td>The BFMS box designer for enclosures and control panels. Prints a box body and exports a flat face plate for the laser or waterjet.</td></tr>
+<tr><td><a href="${SITE.boxStudio}" target="_blank" rel="noopener">Box Studio</a></td><td>The BFMS box designer for electronics. Gives you a 3D printed base with bosses for heat-set inserts and a flat face plate for the waterjet or laser. Required for the instrument-panel box.</td></tr>
 <tr><td><a href="https://www.onshape.com/en/education" target="_blank" rel="noopener">Onshape</a></td><td>Real CAD in the browser on any laptop. Free for students.</td></tr>
 <tr><td><a href="https://www.autodesk.com/education/edu-software/overview" target="_blank" rel="noopener">Fusion</a>, SolidWorks, NX</td><td>Real CAD with more power. See <a href="#/lesson/dxf">Exporting a DXF</a>.</td></tr>
 <tr><td>AI assistant</td><td>Describe the box in words and get an SVG. Use the prompt below.</td></tr>
@@ -192,7 +193,7 @@ Then list each panel with its size so I can check it.</pre><button class="btn gh
 <p>You don't need 3D printer training for this project. The 3D print lab's student workers print your part and can help you get the file ready. If you want to run the printers yourself later, take the training then.</p>
 <h3>How it works</h3>
 <ol class="steps">
-<li><b>Make an STL</b> of your part. Prints are PLA on the Prusa printers. Box Studio, Onshape, Fusion, SolidWorks and NX all export STL.</li>
+<li><b>Make an STL</b> of your part. Prints are PLA on the Prusa printers. For the instrument-panel box, Box Studio exports the base STL for you. Box Studio, Onshape, Fusion, SolidWorks and NX all export STL.</li>
 <li><b>Send a request.</b> Scan the 3D Print Request QR code on the BFMS poster, or use <a href="${SITE.printForm}" target="_blank" rel="noopener">the request form</a>. Upload your STL and say it's for ENGR 102.</li>
 <li><b>Approve the estimate.</b> You'll get the weight, time and cost. ENGR 102 prints are billed to the course account. Reply to approve it.</li>
 <li><b>Wait for the pickup notice.</b> Print time depends on the queue, so send your request early.</li>
@@ -237,6 +238,12 @@ Then list each panel with its size so I can check it.</pre><button class="btn gh
 <li><b>Pilot hole</b> into the second piece, about the size of the screw's core (3/32 for a #6 in softwood). Without it, end grain splits.</li>
 <li>Clamp the pieces before you drill the pilots. Drive screws slowly and stop when the head is flush. Over-driving strips the wood.</li>
 <li>Safety glasses on. Clamp small parts. Never hold them by hand while drilling.</li></ul></details>
+<details><summary>Heat-set inserts</summary><ul>
+<li>A heat-set insert is a small threaded brass sleeve. You melt it into a printed hole so a machine screw has real threads to bite.</li>
+<li>Staff set the insert iron's temperature. Use only the insert tip, never a regular soldering tip.</li>
+<li>Set the insert on the hole, then press straight down slowly and let the heat do the work. Stop when it's flush with the boss.</li>
+<li>Hold it square for a few seconds while the plastic cools. A crooked insert means a crooked screw.</li>
+<li>The tip and the insert are hot enough to burn. Park the iron in its stand. Work where the fumes can clear.</li></ul></details>
 <details><summary>Finger brake</summary><ul>
 <li>Aluminum edges are sharp. Deburr the blank before you bend. Gloves are fine here.</li>
 <li>Keep your fingers out from under the clamping fingers and away from the bending leaf.</li>
@@ -265,7 +272,7 @@ Then list each panel with its size so I can check it.</pre><button class="btn gh
 { id:'check', title:'Readiness check', time:'10 min',
   goals:['Confirm you know the rules before your plan meeting'],
   need:['Nothing'],
-  body:`<p>Fifteen questions on the rules and the machines. Get 13 right to pass. Show the result to staff at your plan sign-off. It doesn't replace your BFMS training.</p><p><a class="btn" href="#/check">Start the check</a></p>`,
+  body:`<p>Sixteen questions on the rules and the machines. Get 14 right to pass. Show the result to staff at your plan sign-off. It doesn't replace your BFMS training.</p><p><a class="btn" href="#/check">Start the check</a></p>`,
   check:['I passed the readiness check']}
 ];
 
@@ -288,12 +295,12 @@ const DESIGNS = [
   parts:[['A',1,'Body, one 4×4 block','5.50 × 3.50 × 3.50','untreated 4×4'],['B',1,'Drawer, cut from A','4.10 × 1.80 × 3.25','same block'],['C',1,'Pull','1.50 × .38','1/8 aluminum, acrylic or print']],
   steps:['Stick the paper template on a long-grain face of the block.','Cut the curved outside shape.','Slice the .25 back off the block and set it aside.','Enter at the left side, cut all the way around the drawer outline, and leave through the same entry kerf.','Glue and clamp the entry kerf shut with wood glue.','Slice .25 off the front and the back of the drawer piece.','On the drawer core, cut the hollow down from the top edge, leaving .375 at the bottom and .75 at the sides. Glue the drawer front and back back on.','Glue the back onto the body. Sand everything, then fit the pull with screws or epoxy.'],
   yours:['Draw your own outline and drawer shape','Bend an aluminum pull on the finger brake','Print a custom knob','Carve or wood-burn the front']},
-{ id:'b4', name:'Instrument-panel box', tag:'An aluminum control-panel top on a plywood or 3D printed body.', size:'6.00 × 4.00 × 2.50',
-  mats:['1/8 6061 aluminum','Body: 1/8 plywood or a 3D print'], machines:['Waterjet (staff)','Red or blue laser, or the 3D print lab'], time:'About 4 hours plus the waterjet queue', level:'Good for electronics fans',
-  how:'Lay out the knob, switch and window holes in Box Studio, which exports the aluminum plate as a DXF. For the body, laser a finger-jointed plywood box, or have Box Studio make a printed frame with screw bosses.',
-  parts:[['A',1,'Top plate','6.00 × 4.00 × .125','6061 aluminum'],['B',1,'Body: laser plywood box, or a 3D printed frame from Box Studio','6.00 × 4.00 × 2.37','1/8 ply or print'],['C',4,'Corner blocks (plywood body only)','.75 × .75 × 2.25','ply scraps or pine'],['D',1,'Window, optional','2.75 × 1.25','1/8 acrylic'],['—',4,'Screws','#6 × 1/2 pan head','steel']],
-  steps:['Open Box Studio, switch to plate mode and inches, and place your parts.','Export the plate DXF, add the material outline, and check it in the file checker.','Submit the DXF. Staff waterjet the plate.','Plywood body: laser it and glue it up with a block in each corner. Printed body: send Box Studio\'s STL as a print request.','Deburr the plate. Pilot-drill the blocks, or use the printed bosses.','Screw the plate on. Add switches, a knob or an LED if you like.'],
-  yours:['Move or add cutouts','Add a real switch and LED','Engrave labels on the plate','Glue acrylic behind the window with epoxy']},
+{ id:'b4', name:'Instrument-panel box', tag:'A 3D printed base from Box Studio with an aluminum control-panel top.', size:'6.00 × 4.00 × 2.50',
+  mats:['1/8 6061 aluminum plate','3D printed PLA base','M3 heat-set brass inserts'], machines:['Box Studio','3D print lab','Waterjet (staff)','Insert iron'], time:'About 3 hours plus the print and waterjet queues', level:'Good for electronics fans',
+  how:'Design the whole box in Box Studio. In plate mode it gives you two files: an STL for the printed base, with four corner bosses, and a DXF for the aluminum top plate with your knob, switch and window holes. Brass heat-set inserts melt into the bosses, so the plate screws on and off as many times as you need for wiring.',
+  parts:[['A',1,'Top plate','6.00 × 4.00 × .125','6061 aluminum, waterjet'],['B',1,'Base with 4 corner bosses (Box Studio, plate mode)','6.00 × 4.00 × 2.37','PLA, under 150 g'],['C',4,'Heat-set insert','M3','brass'],['D',4,'Button-head screw','M3 × 8','steel'],['E',1,'Window, optional','2.75 × 1.25','1/8 acrylic']],
+  steps:['Open Box Studio, switch to plate mode and inches, and set the size to 6 × 4.','Place your knob, switches, LED and window. Box Studio flags anything that hits a wall or a boss.','Export the base STL and the plate DXF. Add the material outline to the DXF and check it in the file checker.','Send the STL as a 3D print request and approve the estimate. Keep it under 150 g; thin walls and low infill help.','Submit the DXF. Staff waterjet the plate. Deburr it.','Press an M3 heat-set insert into each boss with the insert iron. Staff or the 3D print lab workers show you how.','Wire your parts, then screw the plate on with four M3 × 8 screws.'],
+  yours:['Move or add cutouts','Add a real switch and LED','Engrave labels on the plate','Print the base in a color you like','Glue acrylic behind the window with epoxy']},
 { id:'b5', name:'Folded aluminum tray', tag:'1/8 aluminum folded on the finger brake, riveted corner tabs, plywood lid.', size:'5.25 × 3.38 × 1.50',
   mats:['1/8 1100-O aluminum (soft temper)','1/8 plywood'], machines:['Waterjet (staff)','Finger brake','Rivet tool','Red or blue laser'], time:'About 3 hours plus the waterjet queue', level:'Good intro to sheet metal',
   how:'Staff waterjet a flat blank with its tab and rivet holes already cut. You fold the four corner tabs, then the walls, on the finger brake. The tabs end up inside the box against the long walls, and a pop rivet goes through each one. The plywood lid has a smaller layer underneath that drops inside the rim and clears the tabs. The drawings are for 1/8; staff have a 1/16 pattern too.',
@@ -316,6 +323,7 @@ const QUIZ = [
 { q:'You\'re gluing clear acrylic to plywood. What do you use?', a:['Super glue','Two-part epoxy','Hot glue'], c:1 },
 { q:'How do you get a part 3D printed?', a:['Walk up and start a printer','Send a request with the QR code, approve the estimate, pick it up in 101C','Email your instructor the STL'], c:1 },
 { q:'Why drill a clearance hole and a pilot hole before driving a screw?', a:['So the screw pulls the pieces together and the wood doesn\'t split','So the screw goes in faster','Only for metal screws'], c:0 },
+{ q:'How do you install a heat-set insert?', a:['Hammer it in','Press it in straight with the hot insert tip until it\'s flush','Glue it into the hole'], c:1 },
 { q:'Why do you bend aluminum slightly past square?', a:['It springs back a little when you let go','It makes the corner stronger','The brake can\'t reach 90 degrees'], c:0 },
 { q:'An AI tool made your SVG. What do you do before cutting?', a:['Send it straight to the laser','Run it through the file checker, measure it, and fix it','Nothing. AI files are exact.'], c:1 }
 ];

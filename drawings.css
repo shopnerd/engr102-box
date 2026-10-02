@@ -35,3 +35,5 @@
 .rivet{fill:var(--alu3);stroke:var(--ink);stroke-width:.8}
 .ns{stroke-width:.7}.ns.wd{stroke:var(--wood)}.ns.wd2{stroke:var(--wood2)}.ns.wd3{stroke:var(--wood3)}.ns.wdf{stroke:var(--wood2)}
 .edge{stroke:var(--ink);stroke-width:1}
+.kn2{fill:var(--alu2);stroke:var(--ink);stroke-width:1}
+.layer{stroke:var(--print2);stroke-width:.6;stroke-opacity:.7}
