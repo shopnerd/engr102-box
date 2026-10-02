@@ -65,6 +65,7 @@ function design(id){
     <div><h3>Parts</h3><div class="tw"><table><tr><th>Mark</th><th>Qty</th><th>Part</th><th>Size</th><th>Material</th></tr>${d.parts.map(p=>`<tr><td><b>${esc(p[0])}</b></td><td>${p[1]}</td><td>${esc(p[2])}</td><td class="n">${esc(p[3])}</td><td>${esc(p[4])}</td></tr>`).join('')}</table></div>
       <h3>Make it yours</h3><ul>${d.yours.map(y=>`<li>${esc(y)}</li>`).join('')}</ul></div>
     <div><h3>Build steps</h3><ol>${d.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+      ${d.id === 'b4' ? `<p class="row noprint"><a class="btn ghost" href="${SITE.boxStudio}" target="_blank" rel="noopener">Open Box Studio</a></p>` : ''}
       ${d.files ? `<h3>Cut files</h3><p class="row noprint"><button class="btn ghost" id="dl-walls" type="button">Walls DXF (acrylic, 12 × 12)</button><button class="btn ghost" id="dl-plates" type="button">Base and lid DXF (12 × 24)</button></p><p class="lm">Drawn for 3 mm (.118) acrylic with the material outline included. Bolted option: T-slots and screw holes are in the files.</p>` : ''}
       <p class="row noprint" style="margin-top:16px"><button class="btn" id="usedesign">Use this design in my plan</button></p></div>
   </div>`;
