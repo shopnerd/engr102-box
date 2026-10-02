@@ -23,4 +23,21 @@ r2.R.forEach(r=>console.log('   ',r.lvl,r.msg));ok(r2.R.filter(r=>r.lvl==='fail'
 // bulge: LWPOLYLINE full circle from two bulge-1 arcs, r=1
 const circ=['0','SECTION','2','ENTITIES','0','LWPOLYLINE','8','P','90','2','70','1','10','-1','20','0','42','1','10','1','20','0','42','1','0','ENDSEC','0','EOF'].join('\n');
 const g=Audit.parseDXF(circ);const pts=g.polys[0].pts;const rr=pts.map(p=>Math.hypot(p[0],p[1]));ok(Math.max(...rr)<1.0001&&Math.min(...rr)>0.9999,'bulge arcs land on the circle');
+
+// T-slot box: walls interlock exactly at the corners; base slots match the tabs; DXF passes the checker
+{
+  const t=.118, o={L:6,W:4,H:3,t,tb:t,assembly:'tslot'};
+  const r=BoxGen.tslotBox(o), area=pts=>Math.abs(pts.reduce((s,p,i)=>{const q=pts[(i+1)%pts.length];return s+p[0]*q[1]-q[0]*p[1]},0)/2);
+  const walls=r.panels.slice(0,4), wallVol=walls.reduce((s,p)=>s+area(p.pts),0)*t;
+  // expected: wall shell volume + 8 tabs (0.5 x tb x t each) - 4 T-slots (stem + nut pocket areas) x t
+  const slotA=.126*(.42)+(.226-.126)*.1, shell=(6*4-(6-2*t)*(4-2*t))*3, expect=shell+8*.5*t*t-4*slotA*t;
+  ok(Math.abs(wallVol-expect)<1e-6,`T-slot walls tile the shell (${wallVol.toFixed(5)} vs ${expect.toFixed(5)})`);
+  const lay=BoxGen.layout(walls,12,12,.25); ok(lay.fits,'acrylic walls fit a 12x12 sheet');
+  const lay2=BoxGen.layout(r.panels.slice(4),24,12,.25); ok(lay2.fits,'base, lid and lip fit a 24x12 sheet');
+  for(const [name,lay_,sw,sh] of [['walls',lay,12,12],['plates',lay2,24,12]]){
+    const d=BoxGen.dxf(BoxGen.placed(lay_),sw,sh);
+    const res=Audit.run({name:name+'.dxf'},d,{machine:{kind:'laser',name:'laser',bed:[32,18],maxT:.25,pierce:.2,capMin:15},material:'acrylic',t:.125,stock:[sw,sh],speed:.4,assumeMM:false},null);
+    res.R.forEach(x=>console.log('   ',x.lvl,x.msg));ok(!res.R.some(x=>x.lvl==='fail'),`T-slot ${name} DXF passes the checker`);
+  }
+}
 process.exit(fail?1:0);

@@ -275,3 +275,40 @@ D3.b5=()=>{const v=ISO(),L=5.25,W=3.375,H=1.5,t=.125,ro=.25,ri=.125,lz=3.6,tz0=.
   boxNow(v,0,W-t,ro,L,W,H,'alu',rivets);                   // front wall with rivet heads
   boxNow(v,.15,.2875,lz,L-.15,W-.2875,lz+.125,'wood');boxNow(v,0,0,lz+.125,L,W,lz+.25,'wood');
   return isoSvg(v,'B5 folded aluminum tray: rounded bends, open relief corners, riveted tabs inside, lid lifted')};
+/* B6: all-acrylic T-slot box. Outlines come from BoxGen.tslotBox, the same code that writes the cut files. */
+const B6={L:6,W:4,H:3,t:.118,m:.25};
+D.b6=()=>{
+  const {L,W,H,t,m}=B6,r=BoxGen.tslotBox({L,W,H,t,tb:t,assembly:'tslot'}),BL=L+2*m,BW=W+2*m;
+  const flipPts=(pts,h)=>pts.map(([x,y])=>[x,h-y]);
+  const f=V(70,120,58);f.title(0,-1.25,'FRONT VIEW, ASSEMBLED');
+  const lz=t+H;
+  const Y=z=>lz+t-z;
+  f.rect(0,Y(lz+t),BL,t,'ac');f.rect(m+t+.02,Y(lz+t)+t,L-2*t-.04,t,'hid');
+  f.rect(m,Y(lz),L,H,'ac');f.rect(0,Y(t),BL,t,'ac');
+  [L/4,3*L/4].forEach(x=>f.rect(m+x-.25,Y(t),.5,t,'hid'));
+  const cx=m+L/2;f.rect(cx-.063,Y(t+.42),.126,.42,'ol');f.rect(cx-.113,Y(t+.32),.226,.1,'nut');
+  f.rect(cx-.06,Y(t+.47),.12,.47,'hid');f.rect(cx-.11,Y(0)-0,.22,.06,'ol');
+  f.dimH(0,BL,Y(0),Y(0)+.45,BL.toFixed(2));f.dimH(m,m+L,Y(lz),Y(lz+t)-.4,L.toFixed(2)+' WALLS');f.dimV(Y(lz+t),Y(0),0,-.55,(lz+t).toFixed(2));
+  f.note(cx+.11,Y(t+.27),cx+1.0,Y(t+1.3),'M3 NUT IN T-SLOT, SCREW FROM BELOW');f.note(m+L/4,Y(t/2),m+L/4-.6,Y(-.35),'TAB IN BASE SLOT');
+  const fw=r.panels[0],sw=r.panels[2];
+  const a=V(560,110,52);a.title(0,-.8,'FRONT / BACK WALL, AS CUT (2)');a.poly(flipPts(fw.pts,H),'ac');
+  a.dimH(0,L,H+t,H+t+.4,L.toFixed(2));a.dimV(0,H,L,L+.4,H.toFixed(2));a.dimH(L/4-.25,L/4+.25,H,H-.35,'.50');a.text(L/2,H+.42,'T-SLOT','lbl');
+  const b=V(560,350,52);b.title(0,-.8,'SIDE WALL, AS CUT (2)');b.poly(flipPts(sw.pts,H),'ac');
+  b.dimH(0,W,H+t,H+t+.4,W.toFixed(2));b.dimV(0,H,W,W+.4,H.toFixed(2));
+  const p=V(70,430,46);p.title(0,-.6,'BASE, TOP VIEW');const base=r.panels[4];
+  p.poly(flipPts(base.pts,BW),'ac');base.holes.forEach(h=>h.c?p.circ(h.c[0],BW-h.c[1],h.c[2],'holeF'):p.poly(flipPts(h.pts,BW),'holeF'));
+  p.dimH(0,BL,BW,BW+.45,BL.toFixed(2));p.dimV(0,BW,0,-.5,BW.toFixed(2));p.note(m+L/2,BW-(m+t/2),m+L/2+.5,BW-(m+t/2)-.7,'Ø.130 M3 CLEARANCE, 4×');
+  const d=V(790,430,200);d.title(0,-.12,'DETAIL D, T-SLOT');const s0=.063,n0=.113;
+  d.poly([[0,0],[.6,0],[.6,.5],[.3+s0,.5],[.3+s0,.28],[.3+n0,.28],[.3+n0,.18],[.3+s0,.18],[.3+s0,.08],[.3-s0,.08],[.3-s0,.18],[.3-n0,.18],[.3-n0,.28],[.3-s0,.28],[.3-s0,.5],[0,.5]],'ac');
+  d.rect(0,.5,.6,t,'ac');d.rect(.3-n0+.006,.185,.214,.09,'nut');d.rect(.3-.05,.1,.1,.5+t-.1,'hid');d.rect(.3-.1,.5+t,.2,.05,'ol');
+  d.text(0,.5+t+.22,'STEM .126 W × .42 DEEP','dt','start');d.text(0,.5+t+.34,'NUT POCKET .226 × .10, AT .22','dt','start');d.text(0,.5+t+.46,'M3 × 12 SCREW + M3 NUT','dt','start');
+  return svg(1020,680,'B6 acrylic T-slot box: assembled front view, walls as cut, base, T-slot detail',[f,a,b,p,d])};
+D3.b6=()=>{const v=ISO(),{L,W,H,t,m}=B6,BL=L+2*m,BW=W+2*m,c=.02,lz=t+H+1.1;
+  const nutY=v2=>{const x=m+L/2;v2.yf(x-.113,x+.113,t+.22,t+.32,m+W,'nut')},nutX=v2=>{const y=m+W/2;v2.xf(y-.113,y+.113,t+.22,t+.32,m+L,'nut')};
+  const fingersF=v2=>{const n=5,s=H/n;for(let i=0;i<n;i++)if(i%2===1){v2.yf(m,m+t,t+i*s,t+(i+1)*s,m+W,'ac3');v2.yf(m+L-t,m+L,t+i*s,t+(i+1)*s,m+W,'ac3')}};
+  v.part(0,0,0,BL,BW,t,'acr')
+   .part(m,m,t,m+L,m+t,t+H,'acr').part(m,m+t,t,m+t,m+W-t,t+H,'acr')
+   .part(m+L-t,m+t,t,m+L,m+W-t,t+H,'acr',nutX)
+   .part(m,m+W-t,t,m+L,m+W,t+H,'acr',v2=>{fingersF(v2);nutY(v2)})
+   .part(m+t+c,m+t+c,lz,m+L-t-c,m+W-t-c,lz+t,'acr').part(0,0,lz+t,BL,BW,lz+2*t,'acr');
+  return isoSvg(v,'B6 clear acrylic box with T-slot nuts, lid lifted')};

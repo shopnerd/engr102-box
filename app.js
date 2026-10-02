@@ -47,7 +47,7 @@ function lesson(id){
 }
 
 function designs(){
-  return `<p class="eyebrow">Optional starting points</p><h1>Five pre-made designs</h1>
+  return `<p class="eyebrow">Optional starting points</p><h1>${['Zero','One','Two','Three','Four','Five','Six','Seven','Eight'][DESIGNS.length] || DESIGNS.length} pre-made designs</h1>
   <p class="read">Each one is tested to fit the kit and the machines. Change the size, decorate it, or borrow one idea for your own design.</p>
   <div class="grid">${DESIGNS.map(d=>`<a class="dcard" href="#/design/${d.id}"><div class="pic">${D3[d.id]()}</div><div class="txt"><h2><span class="dno">${d.id.toUpperCase()}</span>${esc(d.name)}</h2><p style="margin:0">${esc(d.tag)}</p><div class="chips">${d.machines.map(m=>`<span class="chip">${esc(m)}</span>`).join('')}</div><span class="lm">${esc(d.size)} · ${esc(d.time)}</span></div></a>`).join('')}</div>`;
 }
@@ -65,6 +65,7 @@ function design(id){
     <div><h3>Parts</h3><div class="tw"><table><tr><th>Mark</th><th>Qty</th><th>Part</th><th>Size</th><th>Material</th></tr>${d.parts.map(p=>`<tr><td><b>${esc(p[0])}</b></td><td>${p[1]}</td><td>${esc(p[2])}</td><td class="n">${esc(p[3])}</td><td>${esc(p[4])}</td></tr>`).join('')}</table></div>
       <h3>Make it yours</h3><ul>${d.yours.map(y=>`<li>${esc(y)}</li>`).join('')}</ul></div>
     <div><h3>Build steps</h3><ol>${d.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+      ${d.files ? `<h3>Cut files</h3><p class="row noprint"><button class="btn ghost" id="dl-walls" type="button">Walls DXF (acrylic, 12 × 12)</button><button class="btn ghost" id="dl-plates" type="button">Base and lid DXF (12 × 24)</button></p><p class="lm">Drawn for 3 mm (.118) acrylic with the material outline included. Bolted option: T-slots and screw holes are in the files.</p>` : ''}
       <p class="row noprint" style="margin-top:16px"><button class="btn" id="usedesign">Use this design in my plan</button></p></div>
   </div>`;
 }
@@ -140,7 +141,7 @@ function wire(a, b){
       e.preventDefault();
       const cad = $('#pk1').value, fun = $('#pk2').value, out = $('#pkout');
       if (!cad || !fun) { out.textContent = 'Answer both questions first.'; return; }
-      const pick = { laser:'b1', wood:'b3', metal:'b5', mix:'b4' }[fun], d = DESIGNS.find(x => x.id === pick);
+      const pick = { laser:'b6', wood:'b3', metal:'b5', mix:'b4' }[fun], d = DESIGNS.find(x => x.id === pick);
       out.innerHTML = cad === 'y'
         ? `Design your own. Borrow ideas from <a href="#/design/${pick}">${esc(d.name)}</a>, then read <a href="#/lesson/cad">Designing your own</a>.`
         : `Start from <a href="#/design/${pick}">${pick.toUpperCase()} ${esc(d.name)}</a> and make it yours.`;
@@ -153,6 +154,13 @@ function wire(a, b){
   if (a === 'design') {
     const u = $('#usedesign');
     if (u) u.addEventListener('click', () => { S.plan.path = b; fillFromDesign(b); save(); location.hash = '#/plan'; });
+    const w = $('#dl-walls'), pl = $('#dl-plates');
+    if (w && pl){
+      const r = BoxGen.tslotBox({ L: B6.L, W: B6.W, H: B6.H, t: B6.t, tb: B6.t, assembly: 'tslot' });
+      const file = (parts, sw, sh) => BoxGen.dxf(BoxGen.placed(BoxGen.layout(parts, sw, sh, 0.25)), sw, sh);
+      w.addEventListener('click', () => download('B6_walls_12x12.dxf', file(r.panels.slice(0, 4), 12, 12), 'application/dxf'));
+      pl.addEventListener('click', () => download('B6_base_lid_24x12.dxf', file(r.panels.slice(4), 24, 12), 'application/dxf'));
+    }
   }
   if (a === 'plan') {
     const f = $('#planform'), saved = $('#saved');

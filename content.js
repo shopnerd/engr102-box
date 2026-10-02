@@ -83,7 +83,7 @@ const LESSONS = [
 <p>There are two ways to do this project. Neither is the "easy" one. Pre-made designs still need your own choices, and your own design can be simple.</p>
 <div class="cards2">
 <div class="pcard"><h4>Design your own</h4><p>Pick the size, shape, joints and materials. Use CAD, the laser box designer, Box Studio, or AI help. Best if you want to learn CAD or your major will use it.</p><a class="btn" href="#/lesson/cad">Designing your own</a></div>
-<div class="pcard"><h4>Start from a pre-made design</h4><p>Pick one of five tested designs. Change the size and make it yours with engraving, cutouts, inlays, a printed part or a finish. You won't need CAD.</p><a class="btn" href="#/designs">See the five designs</a></div>
+<div class="pcard"><h4>Start from a pre-made design</h4><p>Pick one of six tested designs. Change the size and make it yours with engraving, cutouts, inlays, a printed part or a finish. You won't need CAD.</p><a class="btn" href="#/designs">See the five designs</a></div>
 </div>
 <h3>Help me pick</h3>
 <form id="picker" class="picker">
@@ -96,7 +96,7 @@ const LESSONS = [
 </form>`,
   check:['I picked my path: my own design or a pre-made one']},
 
-{ id:'designs', title:'The five pre-made designs', time:'20 min',
+{ id:'designs', title:'The six pre-made designs', time:'20 min',
   goals:['See each design, its parts and its machines','Pick one, or borrow ideas for your own'],
   need:['Nothing'],
   body:`<p>Each design has a sample view, full drawings, a parts list and build steps.</p><p><a class="btn" href="#/designs">Open the design gallery</a></p>`,
@@ -253,6 +253,13 @@ Then list each panel with its size so I can check it.</pre><button class="btn gh
 <li>Submit your DXF and wait for staff to cut it.</li>
 <li>Waterjet edges can be rough. File and sand them before handling a lot.</li></ul></details>
 <details><summary>Gluing</summary>${GLUE}</details>
+<details><summary>Cementing acrylic</summary><ul>
+<li>Use thin solvent cement, the kind in a needle bottle. It melts the two surfaces together, so the joint must fit tight with no gaps. Laser-cut edges are perfect for it.</li>
+<li>Tape or clamp the parts together first, dry. Then touch the needle to the inside of the joint and let the cement wick along it. Don't brush it on.</li>
+<li>Hold still for about 30 seconds. Handle after 10 minutes, full strength after a day.</li>
+<li>Drips leave permanent marks, so keep the bottle away from faces you can see and work with the joint flat.</li>
+<li>Only at the ventilated station, with nitrile gloves and safety glasses. Cap the bottle when you put it down.</li>
+<li>Cement only bonds acrylic to acrylic. For acrylic to wood or metal, use epoxy.</li></ul></details>
 <details><summary>Sanding and finishing</summary><ul>
 <li>Sand by hand through 120, 180 and 220 grit. Small parts don't go on the disc sander.</li>
 <li>Use a dust mask or extraction when sanding.</li></ul></details>`,
@@ -272,7 +279,7 @@ Then list each panel with its size so I can check it.</pre><button class="btn gh
 { id:'check', title:'Readiness check', time:'10 min',
   goals:['Confirm you know the rules before your plan meeting'],
   need:['Nothing'],
-  body:`<p>Sixteen questions on the rules and the machines. Get 14 right to pass. Show the result to staff at your plan sign-off. It doesn't replace your BFMS training.</p><p><a class="btn" href="#/check">Start the check</a></p>`,
+  body:`<p>Seventeen questions on the rules and the machines. Get 15 right to pass. Show the result to staff at your plan sign-off. It doesn't replace your BFMS training.</p><p><a class="btn" href="#/check">Start the check</a></p>`,
   check:['I passed the readiness check']}
 ];
 
@@ -306,7 +313,14 @@ const DESIGNS = [
   how:'Staff waterjet a flat blank with its tab and rivet holes already cut. You fold the four corner tabs, then the walls, on the finger brake. The tabs end up inside the box against the long walls, and a pop rivet goes through each one. The plywood lid has a smaller layer underneath that drops inside the rim and clears the tabs. The drawings are for 1/8; staff have a 1/16 pattern too.',
   parts:[['A',1,'Tray blank, flat pattern with tabs','7.80 × 5.93','1/8 1100-O aluminum'],['B',1,'Lid top','5.25 × 3.38','1/8 ply'],['C',1,'Lid lip, glued under B','4.95 × 2.80','1/8 ply'],['D',4,'Pop rivet, aluminum','5/32, grip .188–.250','aluminum']],
   steps:['Submit the flat pattern DXF. Staff waterjet the blank, tabs and rivet holes.','Deburr every edge and hole.','Tabs first: bend each of the four tabs up 90° with the 1-inch finger.','Bends 1 and 2, the end walls: use the 2-inch finger centered, so the tabs clear it. Bend a little past square to allow for springback.','Bends 3 and 4, the long walls: use the 3-inch finger centered between the tabs. Each long wall closes against two tabs.','Line up the holes and set a pop rivet in each corner, head on the outside. If a hole is off, staff drill through the tab hole.','Laser B and C. Glue C centered under B with wood glue.','Drop the lid on. The lip keeps it in place.'],
-  yours:['Engrave the lid','Use acrylic for the lid instead','Add a laser-cut divider that sits on the tabs','Try brass or colored rivets']}
+  yours:['Engrave the lid','Use acrylic for the lid instead','Add a laser-cut divider that sits on the tabs','Try brass or colored rivets']},
+{ id:'b6', name:'Acrylic T-slot box', tag:'Clear acrylic walls held together with nuts and bolts, or cemented.', size:'6.50 × 4.50 × 3.24',
+  mats:['1/8 (3 mm) cast acrylic','Second material: plywood base and lid, a 3D printed knob, or an aluminum handle'], machines:['Red or blue laser'], time:'About 2–3 hours', level:'Good first project. Two ways to assemble.',
+  how:'Four acrylic walls finger-joint at the corners and stand on a bigger base plate. Each wall has two tabs that drop into slots in the base, and a T-slot: an M3 nut slides into the pocket and a screw comes up through the base into it. No glue needed, and it comes apart. Or skip the screws and cement the joints. The lid lifts off and a smaller lip under it keeps it in place.',
+  parts:[['A',2,'Front and back wall','6.00 × 3.00','1/8 acrylic'],['B',2,'Side wall','4.00 × 3.00','1/8 acrylic'],['C',1,'Base, with tab slots and screw holes','6.50 × 4.50','1/8 acrylic or ply'],['D',1,'Lid','6.50 × 4.50','1/8 acrylic or ply'],['E',1,'Lid lip, under D','5.72 × 3.72','1/8 acrylic or ply'],['F',4,'M3 × 12 screw + M3 nut (bolted option)','M3','steel']],
+  steps:['Download the two cut files below (walls, and base + lid). Measure your acrylic; the files are drawn for 3 mm (.118).','Run both files through the file checker, then laser them. Peel the masking paper.','Dry-fit: push the four walls together at the corners, then set the tabs into the base slots.','Bolted: drop an M3 nut into each T-slot, then drive an M3 × 12 screw up through the base into each nut. Snug only. Acrylic cracks if you crank it.','Cemented instead: tape the box together, then run thin acrylic cement along the inside of each joint and let it wick in. Leave it 10 minutes before handling and a day before using it.','Glue the lip centered under the lid (acrylic cement for acrylic, wood glue for ply), and set the lid on.'],
+  yours:['Use colored acrylic for the walls','Engrave a pattern on the walls before assembly','Make the base and lid from plywood','Print feet or a knob for the lid','Change the size in the laser box designer'],
+  files:true}
 ];
 
 const QUIZ = [
@@ -323,6 +337,7 @@ const QUIZ = [
 { q:'You\'re gluing clear acrylic to plywood. What do you use?', a:['Super glue','Two-part epoxy','Hot glue'], c:1 },
 { q:'How do you get a part 3D printed?', a:['Walk up and start a printer','Send a request with the QR code, approve the estimate, pick it up in 101C','Email your instructor the STL'], c:1 },
 { q:'Why drill a clearance hole and a pilot hole before driving a screw?', a:['So the screw pulls the pieces together and the wood doesn\'t split','So the screw goes in faster','Only for metal screws'], c:0 },
+{ q:'How do you apply acrylic cement?', a:['Brush it on both faces, then press them together','Tape the joint, then let the cement wick into it from the needle bottle','Mix it with epoxy first'], c:1 },
 { q:'How do you install a heat-set insert?', a:['Hammer it in','Press it in straight with the hot insert tip until it\'s flush','Glue it into the hole'], c:1 },
 { q:'Why do you bend aluminum slightly past square?', a:['It springs back a little when you let go','It makes the corner stronger','The brake can\'t reach 90 degrees'], c:0 },
 { q:'An AI tool made your SVG. What do you do before cutting?', a:['Send it straight to the laser','Run it through the file checker, measure it, and fix it','Nothing. AI files are exact.'], c:1 }
