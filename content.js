@@ -39,7 +39,7 @@ const LESSONS = [
 <tr><td>1000-series (1100) aluminum, for bending</td><td class="n">1/16 to 1/8</td><td>Waterjet, then the finger brake</td><td>Staff cut, you bend</td></tr>
 <tr><td>4×4 wood block</td><td class="n">3.5 × 3.5 × 5.5</td><td>Bandsaw</td><td>You, after training</td></tr>
 <tr><td>Douglas fir, planed from shop scrap by staff</td><td class="n">1/2 thick</td><td>Router table, drill</td><td>You, after training</td></tr>
-<tr><td>3D printed part</td><td class="n">up to ${SITE.printLimit}</td><td>3D printer</td><td>3D print lab workers, from your request</td></tr>
+<tr><td>3D printed part</td><td class="n">up to ${SITE.printLimit}</td><td>3D printer</td><td>The 3D print lab prints it from your request</td></tr>
 </table></div>
 <p class="muted">The <b>red laser</b> is in the 3D print lab, room 101C. The <b>blue laser</b> is in SSL 104. ${SITE.printLimitNote}</p>
 <h3>Rules for every box</h3>
@@ -68,8 +68,8 @@ const LESSONS = [
 <tr><td>Bandsaw</td><td>The bandsaw box, curves in wood</td><td>You, after training</td></tr>
 <tr><td>Router table</td><td>The lid groove and bottom dado in the router box</td><td>You, after training</td></tr>
 <tr><td>Finger brake</td><td>Folding aluminum</td><td>You, after a staff demo</td></tr>
-<tr><td>Insert iron</td><td>Heat-set inserts in a printed base</td><td>You, after a staff or 3D print lab demo</td></tr>
-<tr><td>3D printer</td><td>One printed part</td><td><b>No training needed.</b> Send a request. 3D print lab workers print it for you. See <a href="#/lesson/print">3D printing</a>.</td></tr>
+<tr><td>Insert iron</td><td>Heat-set inserts in a printed base</td><td>You, after a staff demo</td></tr>
+<tr><td>3D printer</td><td>One printed part</td><td><b>No training needed.</b> The 3D print lab works like a service bureau: send a request and it prints the part. See <a href="#/lesson/print">3D printing</a>.</td></tr>
 <tr><td>Waterjet</td><td>Aluminum parts</td><td><b>Staff only.</b> You submit a DXF.</td></tr>
 <tr><td>Table saw, chop saw</td><td>Pre-cutting solid wood</td><td><b>Staff only.</b></td></tr>
 </table></div>
@@ -190,7 +190,7 @@ Then list each panel with its size so I can check it.</pre><button class="btn gh
   goals:['Get one part printed without taking printer training'],
   need:['An STL file of your part'],
   body:`
-<p>You don't need 3D printer training for this project. The 3D print lab's student workers print your part and can help you get the file ready. If you want to run the printers yourself later, take the training then.</p>
+<p>You don't need 3D printer training for this project. The 3D print lab works like a service bureau: you send the file, approve the estimate, and pick up the part. Your STL needs to be ready to print when you send it. If you want to run the printers yourself later, take the training then.</p>
 <h3>How it works</h3>
 <ol class="steps">
 <li><b>Make an STL</b> of your part. Prints are PLA on the Prusa printers. For the instrument-panel box, Box Studio exports the base STL for you. Box Studio, Onshape, Fusion, SolidWorks and NX all export STL.</li>
@@ -306,7 +306,7 @@ const DESIGNS = [
   mats:['1/8 6061 aluminum plate','3D printed PLA base','M3 heat-set brass inserts'], machines:['Box Studio','3D print lab','Waterjet (staff)','Insert iron'], time:'About 3 hours plus the print and waterjet queues', level:'Good for electronics fans',
   how:'Design the whole box in Box Studio. In plate mode it gives you two files: an STL for the printed base, with four corner bosses, and a DXF for the aluminum top plate with your knob, switch and window holes. Brass heat-set inserts melt into the bosses, so the plate screws on and off as many times as you need for wiring.',
   parts:[['A',1,'Top plate','6.00 × 4.00 × .125','6061 aluminum, waterjet'],['B',1,'Base with 4 corner bosses (Box Studio, plate mode)','6.00 × 4.00 × 2.37','PLA, under 150 g'],['C',4,'Heat-set insert','M3','brass'],['D',4,'Button-head screw','M3 × 8','steel'],['E',1,'Window, optional','2.75 × 1.25','1/8 acrylic']],
-  steps:['Open Box Studio, switch to plate mode and inches, and set the size to 6 × 4.','Place your knob, switches, LED and window. Box Studio flags anything that hits a wall or a boss.','Export the base STL and the plate DXF. Add the material outline to the DXF and check it in the file checker.','Send the STL as a 3D print request and approve the estimate. Keep it under 150 g; thin walls and low infill help.','Submit the DXF. Staff waterjet the plate. Deburr it.','Press an M3 heat-set insert into each boss with the insert iron. Staff or the 3D print lab workers show you how.','Wire your parts, then screw the plate on with four M3 × 8 screws.'],
+  steps:['Open Box Studio, switch to plate mode and inches, and set the size to 6 × 4.','Place your knob, switches, LED and window. Box Studio flags anything that hits a wall or a boss.','Export the base STL and the plate DXF. Add the material outline to the DXF and check it in the file checker.','Send the STL as a 3D print request and approve the estimate. Keep it under 150 g; thin walls and low infill help.','Submit the DXF. Staff waterjet the plate. Deburr it.','Press an M3 heat-set insert into each boss with the insert iron. Staff show you how.','Wire your parts, then screw the plate on with four M3 × 8 screws.'],
   yours:['Move or add cutouts','Add a real switch and LED','Engrave labels on the plate','Print the base in a color you like','Glue acrylic behind the window with epoxy']},
 { id:'b5', name:'Folded aluminum tray', tag:'1/8 aluminum folded on the finger brake, riveted corner tabs, plywood lid.', size:'5.25 × 3.38 × 1.50',
   mats:['1/8 1100-O aluminum (soft temper)','1/8 plywood'], machines:['Waterjet (staff)','Finger brake','Rivet tool','Red or blue laser'], time:'About 3 hours plus the waterjet queue', level:'Good intro to sheet metal',
