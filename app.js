@@ -5,6 +5,9 @@ function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || {}; } cat
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} }
 const S = Object.assign({ checks:{}, plan:{}, quiz:null, box:null }, load());
 const $ = sel => document.querySelector(sel);
+const BS_LINK = `<a href="${SITE.boxStudio}" target="_blank" rel="noopener">Box Studio</a>`;
+const linkBS = html => html.replace(/(<a[^>]*>.*?<\/a>)|Box Studio/gs, (m, a) => a || BS_LINK);   // link every plain mention
+const escL = t => linkBS(esc(t));
 const main = $('#main');
 
 document.getElementById('defs').innerHTML = DRAW_DEFS;
@@ -38,7 +41,7 @@ function lesson(id){
     <p class="eyebrow">Lesson ${i+1} of ${LESSONS.length} · ${esc(L.time)}</p>
     <h1>${esc(L.title)}</h1>
     <div class="facts"><div><b>You will</b><ul>${L.goals.map(g=>`<li>${esc(g)}</li>`).join('')}</ul></div><div><b>You need</b><ul>${L.need.map(g=>`<li>${esc(g)}</li>`).join('')}</ul></div></div>
-    <div class="body">${L.body}</div>
+    <div class="body">${linkBS(L.body)}</div>
     <section class="check" aria-labelledby="ck"><h2 id="ck">Checkpoint</h2>
       ${L.check.map((t,k)=>`<label><input type="checkbox" id="ck-${id}-${k}" data-k="${k}" ${c[k]?'checked':''}><span>${esc(t)}</span></label>`).join('')}
     </section>
@@ -56,15 +59,15 @@ function design(id){
   const d = DESIGNS.find(x => x.id === id); if (!d) return notFound();
   return `<p class="eyebrow"><a href="#/designs">Designs</a> / ${d.id.toUpperCase()}</p>
   <h1><span class="dno">${d.id.toUpperCase()}</span>${esc(d.name)}</h1>
-  <p class="read" style="font-size:1.08rem">${esc(d.tag)} ${esc(d.how)}</p>
+  <p class="read" style="font-size:1.08rem">${escL(d.tag)} ${escL(d.how)}</p>
   <div class="chips">${d.mats.map(m=>`<span class="chip">${esc(m)}</span>`).join('')}<span class="chip">${esc(d.size)} in</span><span class="chip">${esc(d.time)}</span><span class="chip">${esc(d.level)}</span></div>
   <figure class="iso"><div>${D3[d.id]()}</div><figcaption class="lm">Sample, three-quarter view</figcaption></figure>
   <div class="dwg">${D[d.id]()}</div>
   <p class="lm">Dimensions in inches, ±1/32 unless noted. Draft. Build one before trusting every number.</p>
   <div class="two">
-    <div><h3>Parts</h3><div class="tw"><table><tr><th>Mark</th><th>Qty</th><th>Part</th><th>Size</th><th>Material</th></tr>${d.parts.map(p=>`<tr><td><b>${esc(p[0])}</b></td><td>${p[1]}</td><td>${esc(p[2])}</td><td class="n">${esc(p[3])}</td><td>${esc(p[4])}</td></tr>`).join('')}</table></div>
-      <h3>Make it yours</h3><ul>${d.yours.map(y=>`<li>${esc(y)}</li>`).join('')}</ul></div>
-    <div><h3>Build steps</h3><ol>${d.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+    <div><h3>Parts</h3><div class="tw"><table><tr><th>Mark</th><th>Qty</th><th>Part</th><th>Size</th><th>Material</th></tr>${d.parts.map(p=>`<tr><td><b>${esc(p[0])}</b></td><td>${p[1]}</td><td>${escL(p[2])}</td><td class="n">${esc(p[3])}</td><td>${esc(p[4])}</td></tr>`).join('')}</table></div>
+      <h3>Make it yours</h3><ul>${d.yours.map(y=>`<li>${escL(y)}</li>`).join('')}</ul></div>
+    <div><h3>Build steps</h3><ol>${d.steps.map(s=>`<li>${escL(s)}</li>`).join('')}</ol>
       ${d.id === 'b4' ? `<p class="row noprint"><a class="btn ghost" href="${SITE.boxStudio}" target="_blank" rel="noopener">Open Box Studio</a></p>` : ''}
       ${d.files ? `<h3>Cut files</h3><p class="row noprint"><button class="btn ghost" id="dl-walls" type="button">Walls DXF (acrylic, 12 × 12)</button><button class="btn ghost" id="dl-plates" type="button">Base and lid DXF (12 × 24)</button></p><p class="lm">Drawn for 3 mm (.118) acrylic with the material outline included. Bolted option: T-slots and screw holes are in the files.</p>` : ''}
       <p class="row noprint" style="margin-top:16px"><button class="btn" id="usedesign">Use this design in my plan</button></p></div>
