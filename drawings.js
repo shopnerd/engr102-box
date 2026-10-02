@@ -243,11 +243,35 @@ D3.b3=()=>{const v=ISO(),D=3.5,out=1.35,yb=.25+out,yf=3.25+out;
   clipStart(v,B3.dr,yf+.25);grain(v,.7,4.8,yf+.25,zs);v.o.push('</g>');
   v.part(2.0,yf+.25,1.42,3.5,yf+.5,1.79,"alu");
   return isoSvg(v,'B3 bandsaw box with a curved body and the drawer pulled out')};
-D3.b5=()=>{const v=ISO(),L=5.25,W=3.375,H=1.5,t=.125,lz=2.45,tz0=.41,tz1=1.46,tl=.6,riv=y=>v=>[.46,L-.46].forEach(x=>{const p=[];for(let k=0;k<16;k++){const a=k/16*2*Math.PI;p.push([x+.1*Math.cos(a),y,.94+.1*Math.sin(a)])}v.poly(p,'rivet')});
-  v.part(0,0,0,L,W,t,'alu')
-   .part(0,0,t,L,t,H,'alu').part(0,t,t,t,W-t,H,'alu').part(L-t,t,t,L,W-t,H,'alu')
-   .part(t,t,tz0,t+tl,2*t,tz1,'alu').part(L-t-tl,t,tz0,L-t,2*t,tz1,'alu')
-   .part(t,W-2*t,tz0,t+tl,W-t,tz1,'alu').part(L-t-tl,W-2*t,tz0,L-t,W-t,tz1,'alu')
-   .part(0,W-t,t,L,W,H,'alu',riv(W))
-   .part(.15,.2875,lz,L-.15,W-.2875,lz+.125,'wood').part(0,0,lz+.125,L,W,lz+.25,'wood');
-  return isoSvg(v,'B5 folded aluminum tray with riveted corner tabs inside and the lid lifted')};
+/* General extrusion: profile [u,w] extruded along axis 'x' (u=y, w=z) or 'y' (u=x, w=z). Drawn immediately, no sorting. */
+function extrudeA(v,prof,a0,a1,axis,m){
+  if(area2(prof)<0)prof=prof.slice().reverse();
+  const P3=(u,w,a)=>axis==='x'?[a,u,w]:[u,a,w],[tc,fc,rc]=MAT[m],q=[];
+  for(let i=0;i<prof.length;i++){const p=prof[i],r=prof[(i+1)%prof.length],du=r[0]-p[0],dw=r[1]-p[1],L=Math.hypot(du,dw)||1,nu=dw/L,nw=-du/L;
+    if(nu+nw<=1e-6)continue;q.push({p,r,nu,nw,k:(p[0]+r[0])/2+(p[1]+r[1])/2})}
+  q.sort((s,t)=>s.k-t.k).forEach(s=>v.poly([P3(s.p[0],s.p[1],a0),P3(s.r[0],s.r[1],a0),P3(s.r[0],s.r[1],a1),P3(s.p[0],s.p[1],a1)],(s.nw>.6?tc:s.nu>.6?(axis==='x'?fc:rc):(axis==='x'?fc:rc))+' nsa'));
+  q.forEach(s=>v.line(P3(s.p[0],s.p[1],a0),P3(s.r[0],s.r[1],a0),'edge'));
+  const vis=i=>{const p=prof[i],r=prof[(i+1)%prof.length];return (r[1]-p[1])-(r[0]-p[0])>1e-6};
+  prof.forEach((p,i)=>{if(vis((i-1+prof.length)%prof.length)!==vis(i))v.line(P3(p[0],p[1],a0),P3(p[0],p[1],a1),'edge')});
+  v.poly(prof.map(([u,w])=>P3(u,w,a1)),axis==='x'?rc:fc);
+}
+function boxNow(v,x0,y0,z0,x1,y1,z1,m,deco){const [t,f,r]=MAT[m];
+  v.poly([[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],f);v.poly([[x1,y0,z0],[x1,y1,z0],[x1,y1,z1],[x1,y0,z1]],r);v.poly([[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]],t);if(deco)deco(v)}
+D3.b5=()=>{const v=ISO(),L=5.25,W=3.375,H=1.5,t=.125,ro=.25,ri=.125,lz=3.6,tz0=.41,tz1=1.46,tl=.6;
+  // quarter-round bend profile, outer corner at (0,0), turning from the wall (u in 0..t) into the floor
+  const bend=[...arcPts(ro,ro,ro,180,270,8),...arcPts(ro,ro,ri,270,180,8)];
+  const mir=(p,M)=>p.map(([u,w])=>[M-u,w]);
+  const rivets=v2=>[.46,L-.46].forEach(x=>{const p=[];for(let k=0;k<16;k++){const a=k/16*2*Math.PI;p.push([x+.1*Math.cos(a),W,.94+.1*Math.sin(a)])}v2.poly(p,'rivet')});
+  extrudeA(v,bend,ro,L-ro,'x','alu');                     // back bend
+  boxNow(v,0,0,ro,L,t,H,'alu');                            // back wall, full length
+  extrudeA(v,bend,ro,W-ro,'y','alu');                      // left end bend
+  boxNow(v,0,t,ro,t,W-t,H,'alu');                          // left end wall, between the long walls
+  boxNow(v,ro,ro,0,L-ro,W-ro,t,'alu');                     // floor
+  boxNow(v,t,t,tz0,t+tl,2*t,tz1,'alu');boxNow(v,L-t-tl,t,tz0,L-t,2*t,tz1,'alu');   // back tabs, inside
+  extrudeA(v,mir(bend,L),ro,W-ro,'y','alu');               // right end bend
+  boxNow(v,L-t,t,ro,L,W-t,H,'alu');                        // right end wall
+  boxNow(v,t,W-2*t,tz0,t+tl,W-t,tz1,'alu');boxNow(v,L-t-tl,W-2*t,tz0,L-t,W-t,tz1,'alu');  // front tabs
+  extrudeA(v,mir(bend,W),ro,L-ro,'x','alu');               // front bend
+  boxNow(v,0,W-t,ro,L,W,H,'alu',rivets);                   // front wall with rivet heads
+  boxNow(v,.15,.2875,lz,L-.15,W-.2875,lz+.125,'wood');boxNow(v,0,0,lz+.125,L,W,lz+.25,'wood');
+  return isoSvg(v,'B5 folded aluminum tray: rounded bends, open relief corners, riveted tabs inside, lid lifted')};

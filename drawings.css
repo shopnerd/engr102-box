@@ -37,3 +37,4 @@
 .edge{stroke:var(--ink);stroke-width:1}
 .kn2{fill:var(--alu2);stroke:var(--ink);stroke-width:1}
 .layer{stroke:var(--print2);stroke-width:.6;stroke-opacity:.7}
+.nsa{stroke-width:.7}.nsa.al{stroke:var(--alu)}.nsa.al2{stroke:var(--alu2)}.nsa.al3{stroke:var(--alu3)}
