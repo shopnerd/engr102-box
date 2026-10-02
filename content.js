@@ -38,7 +38,7 @@ const LESSONS = [
 <tr><td>6061 aluminum plate</td><td class="n">1/8 or 1/4</td><td>Waterjet</td><td>Staff. You send a DXF.</td></tr>
 <tr><td>1000-series (1100) aluminum, for bending</td><td class="n">1/16 to 1/8</td><td>Waterjet, then the finger brake</td><td>Staff cut, you bend</td></tr>
 <tr><td>4×4 wood block</td><td class="n">3.5 × 3.5 × 5.5</td><td>Bandsaw</td><td>You, after training</td></tr>
-<tr><td>Poplar boards, pre-cut</td><td class="n">1/2 thick</td><td>Router table</td><td>You, after training</td></tr>
+<tr><td>Douglas fir, planed from shop scrap by staff</td><td class="n">1/2 thick</td><td>Router table, drill</td><td>You, after training</td></tr>
 <tr><td>3D printed part</td><td class="n">up to ${SITE.printLimit}</td><td>3D printer</td><td>3D print lab workers, from your request</td></tr>
 </table></div>
 <p class="muted">The <b>red laser</b> is in the 3D print lab, room 101C. The <b>blue laser</b> is in SSL 104. ${SITE.printLimitNote}</p>
@@ -66,7 +66,7 @@ const LESSONS = [
 <tr><th>Machine</th><th>Used for</th><th>Who runs it</th></tr>
 <tr><td>Red laser (101C), blue laser (SSL 104)</td><td>Plywood and acrylic parts, engraving</td><td>You, after training</td></tr>
 <tr><td>Bandsaw</td><td>The bandsaw box, curves in wood</td><td>You, after training</td></tr>
-<tr><td>Router table</td><td>Grooves and rabbets in the router box</td><td>You, after training</td></tr>
+<tr><td>Router table</td><td>The lid groove and bottom dado in the router box</td><td>You, after training</td></tr>
 <tr><td>Finger brake</td><td>Folding aluminum</td><td>You, after a staff demo</td></tr>
 <tr><td>3D printer</td><td>One printed part</td><td><b>No training needed.</b> Send a request. 3D print lab workers print it for you. See <a href="#/lesson/print">3D printing</a>.</td></tr>
 <tr><td>Waterjet</td><td>Aluminum parts</td><td><b>Staff only.</b> You submit a DXF.</td></tr>
@@ -231,11 +231,17 @@ Then list each panel with its size so I can check it.</pre><button class="btn gh
 <li>Feed against the bit's rotation, right to left when facing the fence. Never feed the other way.</li>
 <li>Use push blocks and a featherboard. Keep your hands away from the bit opening.</li>
 <li>Switch off and wait for the bit to stop before you reach in or adjust anything.</li></ul></details>
+<details><summary>Drilling and countersinking screws</summary><ul>
+<li><b>Clearance hole</b> through the first piece, a little bigger than the screw thread (9/64 for a #6). The screw slides through, so it pulls the pieces together instead of pushing them apart.</li>
+<li><b>Countersink</b> the clearance hole until a screw head sits flush. Test on scrap first.</li>
+<li><b>Pilot hole</b> into the second piece, about the size of the screw's core (3/32 for a #6 in softwood). Without it, end grain splits.</li>
+<li>Clamp the pieces before you drill the pilots. Drive screws slowly and stop when the head is flush. Over-driving strips the wood.</li>
+<li>Safety glasses on. Clamp small parts. Never hold them by hand while drilling.</li></ul></details>
 <details><summary>Finger brake</summary><ul>
 <li>Aluminum edges are sharp. Deburr the blank before you bend. Gloves are fine here.</li>
 <li>Keep your fingers out from under the clamping fingers and away from the bending leaf.</li>
 <li><b>Springback:</b> aluminum bounces back a little when you let go of the leaf. Bend slightly past where you want it, check with a square, and bump it a bit more if it's still open.</li>
-<li>Bend in the order on your drawing. The last bends need fingers that fit between the sides you already bent.</li></ul></details>
+<li>Bend in the order on your drawing. Small tabs go first. The last bends need fingers that fit between the sides and tabs you already bent.</li></ul></details>
 <details><summary>Waterjet (staff only)</summary><ul>
 <li>Submit your DXF and wait for staff to cut it.</li>
 <li>Waterjet edges can be rough. File and sand them before handling a lot.</li></ul></details>
@@ -259,7 +265,7 @@ Then list each panel with its size so I can check it.</pre><button class="btn gh
 { id:'check', title:'Readiness check', time:'10 min',
   goals:['Confirm you know the rules before your plan meeting'],
   need:['Nothing'],
-  body:`<p>Fourteen questions on the rules and the machines. Get 12 right to pass. Show the result to staff at your plan sign-off. It doesn't replace your BFMS training.</p><p><a class="btn" href="#/check">Start the check</a></p>`,
+  body:`<p>Fifteen questions on the rules and the machines. Get 13 right to pass. Show the result to staff at your plan sign-off. It doesn't replace your BFMS training.</p><p><a class="btn" href="#/check">Start the check</a></p>`,
   check:['I passed the readiness check']}
 ];
 
@@ -270,17 +276,17 @@ const DESIGNS = [
   parts:[['A',2,'Outer side, finger jointed','8.00 × 2.25','1/8 ply'],['B',2,'Inner side, lower','7.75 × 1.75','1/8 ply'],['C',2,'Inner side, cap','7.75 × .25','1/8 ply'],['D',1,'End, closed','3.00 × 2.25','1/8 ply'],['E',1,'End, lid exit','3.00 × 1.87','1/8 ply'],['F',1,'Bottom','7.75 × 2.75','1/8 ply'],['G',1,'Lid, engraved','7.85 × 2.72','1/8 acrylic']],
   steps:['Measure the ply and the acrylic. Set the slot to the lid thickness plus a hair.','Laser A–F from one 12 × 24 ply sheet (about 8 min). Laser and engrave G from an 8 × 3 acrylic piece.','Glue B and C to the inside of each A with wood glue, using a scrap of acrylic as a spacer to hold the slot open.','Glue up A, D, E and F. Keep glue out of the slot.','Sand, then slide the lid in. The lid is not glued.'],
   yours:['Engrave a name, pattern or drawing on the lid','Use colored acrylic for the lid','Change the length to fit your pens','Add a laser-cut divider']},
-{ id:'b2', name:'Router-table pencil box', tag:'Solid poplar with a routed groove and rabbet.', size:'9.00 × 3.00 × 2.50',
-  mats:['1/2 poplar (pre-cut)','1/4 plywood','1/8 acrylic or plywood'], machines:['Router table','Red or blue laser'], time:'About 4 hours', level:'Needs router table training',
-  how:'Staff pre-cut the poplar sides and ends. You route a groove for the lid and a rabbet for the bottom, then glue it up.',
-  parts:[['A',2,'Side (staff pre-cut)','9.00 × 2.50 × .50','poplar'],['B',1,'End, closed (staff pre-cut)','2.00 × 2.50 × .50','poplar'],['C',1,'End, lid exit (staff pre-cut)','2.00 × 2.12 × .50','poplar'],['D',1,'Bottom','8.50 × 2.50','1/4 ply'],['E',1,'Lid','8.66 × 2.34','1/8 acrylic or ply']],
-  steps:['Collect your pre-cut poplar from staff.','Router op 1: groove 1/8 wide × 3/16 deep, 1/4 below the top edge, on both sides and the closed end.','Router op 2: rabbet 1/4 × 1/4 on the bottom inside edge of all four pieces.','Laser the bottom and lid. Dry-fit them.','Glue the sides to the ends with wood glue, with the bottom captured but not glued.','Sand, round the edges by hand, and slide the lid in.'],
-  yours:['Engrave the lid','Use a contrasting wood lid','Add a finger notch to the lid','Try a different finish']},
-{ id:'b3', name:'Bandsaw box with drawer', tag:'One 4×4 block, a hidden drawer and a pull.', size:'5.50 × 3.50 × 3.50',
+{ id:'b2', name:'Router-table pencil box', tag:'Douglas fir with routed dados and screwed corners.', size:'9.00 × 3.00 × 2.50',
+  mats:['1/2 Douglas fir (staff plane BFMS scrap)','1/4 or 1/8 plywood bottom','1/8 acrylic or plywood lid'], machines:['Router table','Drill and countersink','Red or blue laser'], time:'About 4 hours', level:'Needs router table training. Teaches predrilling and countersinking.',
+  how:'Staff plane 3/4 Douglas fir scrap down to 1/2 and cut the pieces. You route a groove for the sliding lid and a dado for the inset bottom, then screw the sides to the ends. Every screw gets a clearance hole, a countersink and a pilot hole, which is the real lesson here.',
+  parts:[['A',2,'Side (staff planed and cut)','9.00 × 2.50 × .50','Douglas fir'],['B',1,'End, closed','2.00 × 2.50 × .50','Douglas fir'],['C',1,'End, lid exit','2.00 × 2.12 × .50','Douglas fir'],['D',1,'Bottom, in the dado','8.44 × 2.44','1/4 or 1/8 ply'],['E',1,'Lid','8.66 × 2.34','1/8 acrylic or ply'],['F',8,'Flat-head wood screw','#6 × 1-1/4','steel or brass']],
+  steps:['Collect your planed Douglas fir pieces from staff.','Router op 1: lid groove, 1/8 wide × 3/16 deep, 1/4 below the top edge, on both sides and the closed end.','Router op 2: bottom dado, as wide as your bottom sheet (1/4 or 1/8) × 1/4 deep, 1/4 up from the bottom edge, on all four pieces.','Laser the bottom and the lid. Dry-fit everything with clamps.','Mark the screw centers on the sides: 1/4 in from each end, 3/4 down from the top and 3/4 up from the bottom. That keeps them clear of the groove and the dado.','Drill 9/64 clearance holes through the sides, then countersink each one until a screw head sits flush.','Clamp the box square. Drill 3/32 pilot holes about 1 in deep into the ends, through the clearance holes.','Drive the #6 × 1-1/4 screws by hand or with the drill clutch set low. Stop when the head is flush. No glue, so the box can come apart.','Sand, ease the edges, and slide the lid in.'],
+  yours:['Use brass screws as a design detail','Engrave the lid','Chamfer the edges with a block plane or sandpaper','Try a different finish']},
+{ id:'b3', name:'Bandsaw box with drawer', tag:'A curved body cut from one 4×4 block, with a drawer.', size:'5.50 × 3.50 × 3.45',
   mats:['4×4 construction lumber, untreated','Pull: 1/8 aluminum, acrylic or a 3D print'], machines:['Bandsaw','Finger brake, laser or 3D printer for the pull'], time:'About 3–4 hours', level:'Needs bandsaw training',
-  how:'You cut the drawer out of a solid block, hollow it, and glue the pieces back together. Every inside corner needs a 5/8 radius or larger for the 1/4 blade.',
-  parts:[['A',1,'Body, one 4×4 block','5.50 × 3.50 × 3.50','untreated 4×4'],['B',1,'Drawer, cut from A','4.25 × 2.00 × 3.25','same block'],['C',1,'Pull','1.50 × .38','1/8 aluminum, acrylic or print']],
-  steps:['Stick the paper template on a long-grain face of the block.','Slice the .25 back off the block and set it aside.','Enter at the left side, cut all the way around the drawer outline, and leave through the same entry kerf.','Glue and clamp the entry kerf shut with wood glue.','Slice .25 off the front and the back of the drawer piece.','Cut out the drawer hollow, leaving .375 walls. Glue the drawer front and back back on.','Glue the back onto the body. Sand everything, then fit the pull with screws or epoxy.'],
+  how:'You bandsaw a curved outline, cut the drawer out of the middle, hollow the drawer from the top, and glue the slices back together. Every inside curve needs a 5/8 radius or larger for the 1/4 blade.',
+  parts:[['A',1,'Body, one 4×4 block','5.50 × 3.50 × 3.50','untreated 4×4'],['B',1,'Drawer, cut from A','4.10 × 1.80 × 3.25','same block'],['C',1,'Pull','1.50 × .38','1/8 aluminum, acrylic or print']],
+  steps:['Stick the paper template on a long-grain face of the block.','Cut the curved outside shape.','Slice the .25 back off the block and set it aside.','Enter at the left side, cut all the way around the drawer outline, and leave through the same entry kerf.','Glue and clamp the entry kerf shut with wood glue.','Slice .25 off the front and the back of the drawer piece.','On the drawer core, cut the hollow down from the top edge, leaving .375 at the bottom and .75 at the sides. Glue the drawer front and back back on.','Glue the back onto the body. Sand everything, then fit the pull with screws or epoxy.'],
   yours:['Draw your own outline and drawer shape','Bend an aluminum pull on the finger brake','Print a custom knob','Carve or wood-burn the front']},
 { id:'b4', name:'Instrument-panel box', tag:'An aluminum control-panel top on a plywood or 3D printed body.', size:'6.00 × 4.00 × 2.50',
   mats:['1/8 6061 aluminum','Body: 1/8 plywood or a 3D print'], machines:['Waterjet (staff)','Red or blue laser, or the 3D print lab'], time:'About 4 hours plus the waterjet queue', level:'Good for electronics fans',
@@ -288,12 +294,12 @@ const DESIGNS = [
   parts:[['A',1,'Top plate','6.00 × 4.00 × .125','6061 aluminum'],['B',1,'Body: laser plywood box, or a 3D printed frame from Box Studio','6.00 × 4.00 × 2.37','1/8 ply or print'],['C',4,'Corner blocks (plywood body only)','.75 × .75 × 2.25','ply scraps or pine'],['D',1,'Window, optional','2.75 × 1.25','1/8 acrylic'],['—',4,'Screws','#6 × 1/2 pan head','steel']],
   steps:['Open Box Studio, switch to plate mode and inches, and place your parts.','Export the plate DXF, add the material outline, and check it in the file checker.','Submit the DXF. Staff waterjet the plate.','Plywood body: laser it and glue it up with a block in each corner. Printed body: send Box Studio\'s STL as a print request.','Deburr the plate. Pilot-drill the blocks, or use the printed bosses.','Screw the plate on. Add switches, a knob or an LED if you like.'],
   yours:['Move or add cutouts','Add a real switch and LED','Engrave labels on the plate','Glue acrylic behind the window with epoxy']},
-{ id:'b5', name:'Folded aluminum tray', tag:'1/8 aluminum folded on the finger brake, with a plywood lid.', size:'5.25 × 3.38 × 1.50',
-  mats:['1/8 1100-O aluminum (soft temper)','1/8 plywood'], machines:['Waterjet (staff)','Finger brake','Red or blue laser'], time:'About 3 hours plus the waterjet queue', level:'Good intro to sheet metal',
-  how:'Staff waterjet a flat blank from 1000-series aluminum. The drawings are for 1/8; staff have the pattern for 1/16 too. You fold the four sides up on the finger brake. The plywood lid has a smaller layer glued underneath that drops inside the rim, so it can\'t slide around.',
-  parts:[['A',1,'Tray blank, flat pattern','7.80 × 5.93','1/8 1100 aluminum'],['B',1,'Lid top','5.25 × 3.38','1/8 ply'],['C',1,'Lid lip, glued under B','4.95 × 3.08','1/8 ply']],
-  steps:['Submit the flat pattern DXF. Staff waterjet the blank.','Deburr every edge.','Bends 1 and 2, the long sides: fingers 4 + 1 across the bend line. Bend a little past square to allow for springback.','Bends 3 and 4, the ends: one 3-inch finger, which fits between the long sides.','Laser B and C. Glue C centered under B with wood glue.','Drop the lid on. The lip keeps it in place.'],
-  yours:['Engrave the lid','Use acrylic for the lid instead','Change the tray size to another finger combination','Add laser-cut dividers']}
+{ id:'b5', name:'Folded aluminum tray', tag:'1/8 aluminum folded on the finger brake, riveted corner tabs, plywood lid.', size:'5.25 × 3.38 × 1.50',
+  mats:['1/8 1100-O aluminum (soft temper)','1/8 plywood'], machines:['Waterjet (staff)','Finger brake','Rivet tool','Red or blue laser'], time:'About 3 hours plus the waterjet queue', level:'Good intro to sheet metal',
+  how:'Staff waterjet a flat blank with its tab and rivet holes already cut. You fold the four corner tabs, then the walls, on the finger brake. The tabs end up inside the box against the long walls, and a pop rivet goes through each one. The plywood lid has a smaller layer underneath that drops inside the rim and clears the tabs. The drawings are for 1/8; staff have a 1/16 pattern too.',
+  parts:[['A',1,'Tray blank, flat pattern with tabs','7.80 × 5.93','1/8 1100-O aluminum'],['B',1,'Lid top','5.25 × 3.38','1/8 ply'],['C',1,'Lid lip, glued under B','4.95 × 2.80','1/8 ply'],['D',4,'Pop rivet, aluminum','5/32, grip .188–.250','aluminum']],
+  steps:['Submit the flat pattern DXF. Staff waterjet the blank, tabs and rivet holes.','Deburr every edge and hole.','Tabs first: bend each of the four tabs up 90° with the 1-inch finger.','Bends 1 and 2, the end walls: use the 2-inch finger centered, so the tabs clear it. Bend a little past square to allow for springback.','Bends 3 and 4, the long walls: use the 3-inch finger centered between the tabs. Each long wall closes against two tabs.','Line up the holes and set a pop rivet in each corner, head on the outside. If a hole is off, staff drill through the tab hole.','Laser B and C. Glue C centered under B with wood glue.','Drop the lid on. The lip keeps it in place.'],
+  yours:['Engrave the lid','Use acrylic for the lid instead','Add a laser-cut divider that sits on the tabs','Try brass or colored rivets']}
 ];
 
 const QUIZ = [
@@ -309,6 +315,7 @@ const QUIZ = [
 { q:'Which aluminum do you fold on the finger brake?', a:['1/16 to 1/8 1000-series (1100) aluminum','1/8 6061-T6 plate','1/4 6061 plate'], c:0 },
 { q:'You\'re gluing clear acrylic to plywood. What do you use?', a:['Super glue','Two-part epoxy','Hot glue'], c:1 },
 { q:'How do you get a part 3D printed?', a:['Walk up and start a printer','Send a request with the QR code, approve the estimate, pick it up in 101C','Email your instructor the STL'], c:1 },
+{ q:'Why drill a clearance hole and a pilot hole before driving a screw?', a:['So the screw pulls the pieces together and the wood doesn\'t split','So the screw goes in faster','Only for metal screws'], c:0 },
 { q:'Why do you bend aluminum slightly past square?', a:['It springs back a little when you let go','It makes the corner stronger','The brake can\'t reach 90 degrees'], c:0 },
 { q:'An AI tool made your SVG. What do you do before cutting?', a:['Send it straight to the laser','Run it through the file checker, measure it, and fix it','Nothing. AI files are exact.'], c:1 }
 ];

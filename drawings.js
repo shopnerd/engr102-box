@@ -50,37 +50,61 @@ D.b1=()=>{
   s.balloon(2.94,1.65,3.4,1.65,'A');s.balloon(2.81,1.1,3.4,1.1,'B');s.balloon(2.81,.12,3.4,.4,'C');s.balloon(2.5,2.19,3.4,2.2,'F');s.balloon(1.6,.33,1.9,1.45,'G');
   return svg(1020,600,'B1 laser pencil box: front view, top view, section A-A',[f,t,s])};
 
+/* Shared shapes. Profiles are [x, z] in inches, counter-clockwise, z up. */
+const arcPts=(cx,cz,r,a0,a1,n=10)=>{const p=[];for(let i=0;i<=n;i++){const a=(a0+(a1-a0)*i/n)*Math.PI/180;p.push([cx+r*Math.cos(a),cz+r*Math.sin(a)])}return p};
+const bez=(p0,p1,p2,p3,n=14)=>{const p=[];for(let i=1;i<=n;i++){const t=i/n,u=1-t;p.push([u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]])}return p};
+const B3=(()=>{
+  const outer=[[.75,0],[4.75,0],...arcPts(4.75,.75,.75,-90,0).slice(1),[5.5,2.2],...bez([5.5,2.2],[5.5,3.3],[4.6,3.6],[3.6,3.35]),...bez([3.6,3.35],[2.9,3.18],[2.4,3.1],[1.6,3.3]),...bez([1.6,3.3],[.6,3.55],[0,3.2],[0,2.4]),[0,.75],...arcPts(.75,.75,.75,180,270).slice(1,-1)];
+  const R=.625,dr=[[1.325,.7],[4.175,.7],...arcPts(4.175,1.325,R,-90,0).slice(1),...arcPts(4.175,1.875,R,0,90),...arcPts(1.325,1.875,R,90,180),...arcPts(1.325,1.325,R,180,270).slice(0,-1)];
+  const core=[[1.325,.7],[4.175,.7],...arcPts(4.175,1.325,R,-90,0).slice(1),...arcPts(4.175,1.875,R,0,90),[4.05,2.5],[4.05,1.7],...arcPts(3.425,1.7,R,0,-90).slice(1),[2.075,1.075],...arcPts(2.075,1.7,R,-90,-180).slice(1),[1.45,2.5],...arcPts(1.325,1.875,R,90,180),...arcPts(1.325,1.325,R,180,270).slice(1,-1)];
+  const top=Math.max(...outer.map(p=>p[1]));
+  return {outer,dr,core,top};
+})();
+
 D.b2=()=>{
   const f=V(80,105,52);f.title(0,-.95,'FRONT VIEW');
-  f.rect(0,0,9,2.5,'wd');f.line(0,.25,9,.25,'hid');f.line(0,.375,9,.375,'hid');f.line(0,2.25,9,2.25,'hid');f.line(.5,0,.5,2.5,'hid');f.line(8.5,.375,8.5,2.5,'hid');
-  f.dimH(0,9,2.5,2.95,'9.00');f.dimV(0,2.5,0,-.55,'2.50');f.note(6.6,.31,6.2,-.5,'GROOVE THRU, 1/8 W × 3/16 DP');f.balloon(3,1.4,3,1.4,'A');
-  const t=V(80,375,52);t.title(0,-.65,'TOP VIEW');
+  f.rect(0,0,9,2.5,'wd');
+  f.line(0,.25,9,.25,'hid');f.line(0,.375,9,.375,'hid');f.line(0,2.0,9,2.0,'hid');f.line(0,2.25,9,2.25,'hid');
+  f.line(.5,0,.5,2.5,'hid');f.line(8.5,.375,8.5,2.5,'hid');
+  [[.25,.75],[.25,1.75],[8.75,.75],[8.75,1.75]].forEach(([x,y])=>{f.circ(x,y,.13,'holeF');f.circ(x,y,.07,'ol')});
+  f.dimH(0,9,2.5,2.95,'9.00');f.dimV(0,2.5,0,-.55,'2.50');
+  f.dimV(1.75,2.5,9,9.5,'.75');f.dimV(0,.75,9,9.5,'.75');
+  f.note(6.6,.31,6.2,-.5,'LID GROOVE 1/8 W × 3/16 DP');f.note(4.5,2.12,4.9,3.15,'BOTTOM DADO, SEE A–A');
+  f.note(8.75,.75,7.6,1.3,'#6 FH SCREW, 4 EACH END');f.balloon(3,1.2,3,1.2,'A');
+  const t=V(80,385,52);t.title(0,-.65,'TOP VIEW');
   t.rect(0,0,9,3,'wd');t.line(0,.5,9,.5,'thin');t.line(0,2.5,9,2.5,'thin');t.line(.5,.5,.5,2.5,'thin');t.line(8.5,.5,8.5,2.5,'thin');
   t.rect(.34,.33,8.66,2.34,'ac');t.cpl(4.5,-.4,3.4,'A');t.dimV(0,3,0,-.55,'3.00');t.dimH(.34,9,3,3.5,'LID 8.66');t.balloon(1.2,1.5,1.2,1.5,'E');
-  const Lp=[[0,0],[.5,0],[.5,.25],[.3125,.25],[.3125,.375],[.5,.375],[.5,2.25],[.25,2.25],[.25,2.5],[0,2.5]];
+  const Lp=[[0,0],[.5,0],[.5,.25],[.3125,.25],[.3125,.375],[.5,.375],[.5,2.0],[.25,2.0],[.25,2.25],[.5,2.25],[.5,2.5],[0,2.5]];
   const s=V(720,125,80);s.title(0,-.95,'SECTION A–A');
-  s.secPoly(Lp,'wd');s.secPoly(Lp.map(([x,y])=>[3-x,y]),'wd');s.secRect(.25,2.25,2.5,.25,'wd');s.rect(.33,.25,2.34,.125,'ac');
+  s.secPoly(Lp,'wd');s.secPoly(Lp.map(([x,y])=>[3-x,y]),'wd');s.secRect(.28,2.0,2.44,.25,'wd');s.rect(.33,.25,2.34,.125,'ac');
   s.dimH(0,3,0,-.45,'3.00');s.dimH(.5,2.5,2.5,2.9,'2.00 INSIDE');s.dimV(0,.25,0,-.4,'.25');s.dimV(2.25,2.5,0,-.4,'.25');
-  s.note(.41,.32,.7,.9,'GROOVE 1/8 × 3/16 DP');s.note(.38,2.3,.7,1.85,'RABBET 1/4 × 1/4');
-  s.balloon(2.8,1.3,3.4,1.3,'A');s.balloon(2.0,2.37,3.4,2.35,'D');s.balloon(1.8,.31,2.0,1.38,'E');
-  return svg(1020,600,'B2 router-table pencil box: front view, top view, section A-A',[f,t,s])};
+  s.note(.41,.32,.7,.9,'GROOVE 1/8 × 3/16 DP');s.note(.38,2.12,.7,1.6,'DADO 1/4 × 1/4');
+  s.balloon(2.8,1.3,3.4,1.3,'A');s.balloon(2.0,2.12,3.4,2.4,'D');s.balloon(1.8,.31,2.0,1.25,'E');
+  const d=V(720,455,62);d.title(0,-.75,'DETAIL B, SCREW AT A CORNER (PLAN)');
+  d.secRect(0,0,1.7,.5,'wd');d.secRect(0,.5,.5,1.2,'wd');
+  d.rect(.18,0,.14,.5,'holeF');d.poly([[.1,0],[.4,0],[.32,.08],[.18,.08]],'holeF');d.rect(.203,.5,.094,1.0,'holeF');
+  d.line(.25,-.15,.25,1.6,'ctr');
+  d.note(.32,.25,.9,.9,'CLEARANCE 9/64 THRU SIDE');d.note(.4,.02,.9,.45,'COUNTERSINK 82°, HEAD FLUSH');d.note(.297,1.2,.9,1.35,'PILOT 3/32 × 1 DEEP, END GRAIN');
+  d.text(1.25,.32,'SIDE','lbl');d.text(.25,1.85,'END','lbl');
+  return svg(1020,600,'B2 router-table pencil box: front view, top view, section A-A, screw detail',[f,t,s,d])};
 
 D.b3=()=>{
+  const H=3.5,fl=pts=>pts.map(([x,z])=>[x,H-z]);
   const f=V(80,125,64);f.title(0,-1.15,'FRONT VIEW');
-  f.rect(0,0,5.5,3.5,'wd',.25);f.rect(.625,.875,4.25,2,'drw',.625);f.line(0,1.875,.625,1.875,'cut');
-  f.rect(1,1.25,3.5,1.25,'hid',.5);f.rect(2,1.6875,1.5,.375,'al',.06);
-  f.dimH(0,5.5,3.5,3.95,'5.50');f.dimV(0,3.5,0,-.55,'3.50');f.dimH(.625,4.875,.875,.4,'4.25');f.dimV(.875,2.875,4.875,5.95,'2.00');f.dimV(2.875,3.5,4.875,5.95,'.625');
-  f.note(.8,1.05,1.3,-.5,'R.625 MIN TYP, 1/4 IN BLADE');f.note(.3,1.91,.3,3.2,'ENTRY KERF, GLUE SHUT');
-  f.balloon(5.15,.5,5.15,.5,'A');f.balloon(.82,2.65,.82,2.65,'B');f.balloon(3.5,1.87,5.15,1.5,'C');
+  f.poly(fl(B3.outer),'wd');f.poly(fl(B3.dr),'drw');f.line(0,H-1.6,.7,H-1.6,'cut');
+  f.poly(fl(B3.core),'hid');f.rect(2,H-1.79,1.5,.375,'al',.06);
+  f.dimH(0,5.5,H,H+.45,'5.50');f.dimV(H-B3.top,H,0,-.55,B3.top.toFixed(2)+' MAX');f.dimH(.7,4.8,H-2.5,H-2.95,'4.10');f.dimV(H-2.5,H-.7,4.8,5.95,'1.80');
+  f.note(.88,H-.88,1.4,H-.25,'R.625 MIN TYP, 1/4 IN BLADE');f.note(.3,H-1.6,.3,H-.3,'ENTRY KERF, GLUE SHUT');
+  f.note(1.6,H-1.35,2.3,-.45,'DRAWER HOLLOW (HIDDEN), CUT FROM THE TOP');
+  f.balloon(5.05,H-1.4,5.05,H-1.4,'A');f.balloon(1.0,H-2.15,1.0,H-2.15,'B');f.balloon(3.5,H-1.6,5.05,H-.55,'C');
   const s=V(570,125,64);s.title(0,-1.15,'RIGHT SIDE VIEW');
-  s.rect(0,0,3.5,3.5,'wd');s.line(3.25,0,3.25,3.5,'cutl');
-  s.line(0,.875,3.25,.875,'hid');s.line(0,2.875,3.25,2.875,'hid');s.line(.25,.875,.25,2.875,'cut');s.line(3,.875,3,2.875,'cut');s.rect(.25,1.25,2.75,1.25,'hid');
-  s.dimH(0,3.5,3.5,3.95,'3.50');s.dimH(3.25,3.5,0,-.5,'.25 BACK');s.dimH(0,.25,.875,.45,'.25 TYP');
+  s.rect(0,H-B3.top,3.5,B3.top,'wd');s.line(3.25,H-B3.top,3.25,H,'cutl');
+  s.line(0,H-2.5,3.25,H-2.5,'hid');s.line(0,H-.7,3.25,H-.7,'hid');s.line(.25,H-2.5,.25,H-.7,'cut');s.line(3,H-2.5,3,H-.7,'cut');s.line(.25,H-1.075,3,H-1.075,'hid');
+  s.dimH(0,3.5,H,H+.45,'3.50');s.dimH(3.25,3.5,H-B3.top,H-B3.top-.45,'.25 BACK');s.dimH(0,.25,H-2.5,H-2.95,'.25 TYP');
   const g=V(840,150,36);g.title(0,-1.4,'4×4 END GRAIN');
   g.rect(0,0,3.5,3.5,'wd');[.45,.95,1.45].forEach(r=>g.circ(1.75,1.85,r,'thin'));g.circ(1.75,1.85,.06,'dot');
-  g.dimH(0,3.5,3.5,3.95,'3.50');g.dimV(0,3.5,3.5,4.0,'3.50');g.text(0,4.75,'CROSSCUT 5.50 LONG (STAFF)','lbl','start');g.text(0,5.15,'PITH FALLS IN THE HOLLOW','lbl','start');
+  g.dimH(0,3.5,3.5,3.95,'3.50');g.dimV(0,3.5,3.5,4.0,'3.50');g.text(0,4.75,'CROSSCUT 5.50 LONG (STAFF)','lbl','start');g.text(0,5.15,'PITH FALLS IN THE DRAWER','lbl','start');
   return svg(1020,370,'B3 bandsaw box from 4x4: front view, side view, 4x4 end grain',[f,s,g])};
-
 D.b4=()=>{
   const p=V(90,115,70);p.title(0,-1.05,'TOP VIEW, PLATE');
   p.rect(0,0,6,4,'al',.06);p.rect(.75,.75,2.5,1,'holeF',.06);p.text(2,1.33,'W1','hlab');
@@ -97,24 +121,35 @@ D.b4=()=>{
   v.balloon(3.1,1.4,3.1,1.4,'B');v.balloon(.5,1.6,-.45,1.6,'C');
   return svg(1020,450,'B4 instrument-panel box: plate top view and front view',[p,v])};
 
+/* B5 blank: 1/8 1100-O, r ≈ t, bend deduction .225. Tabs on the end walls fold inward and are riveted inside the long walls. */
+const B5=(()=>{
+  const Ln=7.8,Wn=5.925,n=1.387,lx0=n-.113,lx1=Ln-n+.113,ey0=Wn/2-1.5625,ey1=Wn/2+1.5625,tw=.6,tx0=n-1.35,tx1=n-.3,rx0=Ln-n+.3,rx1=Ln-n+1.35;
+  const outline=[[lx0,0],[lx1,0],[lx1,n],[Ln-n,n],[Ln-n,ey0],[rx0,ey0],[rx0,ey0-tw],[rx1,ey0-tw],[rx1,ey0],[Ln,ey0],[Ln,ey1],[rx1,ey1],[rx1,ey1+tw],[rx0,ey1+tw],[rx0,ey1],[Ln-n,ey1],[Ln-n,Wn-n],[lx1,Wn-n],[lx1,Wn],[lx0,Wn],[lx0,Wn-n],[n,Wn-n],[n,ey1],[tx1,ey1],[tx1,ey1+tw],[tx0,ey1+tw],[tx0,ey1],[0,ey1],[0,ey0],[tx0,ey0],[tx0,ey0-tw],[tx1,ey0-tw],[tx1,ey0],[n,ey0],[n,n],[lx0,n]];
+  const tabHoles=[[n-.825,ey0-.35],[n-.825,ey1+.35],[Ln-n+.825,ey0-.35],[Ln-n+.825,ey1+.35]];
+  const wallHoles=[[n+.347,n-.825],[Ln-n-.347,n-.825],[n+.347,Wn-n+.825],[Ln-n-.347,Wn-n+.825]];
+  return {Ln,Wn,n,ey0,ey1,tw,tx0,tx1,rx0,rx1,lx0,lx1,outline,tabHoles,wallHoles};
+})();
 D.b5=()=>{
-  const W=5.925,Ln=7.8,n=1.387;
-  const fp=V(80,120,56);fp.title(0,-1.05,'FLAT PATTERN, 1/8 1100 ALUMINUM');
-  fp.poly([[n,0],[Ln-n,0],[Ln-n,n],[Ln,n],[Ln,W-n],[Ln-n,W-n],[Ln-n,W],[n,W],[n,W-n],[0,W-n],[0,n],[n,n]],'al');
-  [[n,n],[Ln-n,n],[Ln-n,W-n],[n,W-n]].forEach(([x,y])=>fp.circ(x,y,.125,'holeF'));
-  fp.line(n,n,Ln-n,n,'bend');fp.line(n,W-n,Ln-n,W-n,'bend');fp.line(n,n,n,W-n,'bend');fp.line(Ln-n,n,Ln-n,W-n,'bend');
-  fp.text(Ln/2,n/2+.08,'BEND 1 · UP 90°');fp.text(Ln/2,W-n/2+.08,'BEND 2 · UP 90°');fp.text(n/2,W/2+.08,'BEND 3');fp.text(Ln-n/2,W/2+.08,'BEND 4');
-  fp.text(Ln/2,W/2-.05,'BASE','vt');fp.text(Ln/2,W/2+.3,'5.25 × 3.38 OUTSIDE','dt');
-  fp.dimH(0,Ln,W,W+.45,'7.80');fp.dimV(0,W,0,-.55,'5.93');fp.dimH(0,n,0,-.4,'1.39');fp.dimH(n,Ln-n,0,-.4,'5.03');
-  fp.dimV(0,n,Ln,Ln+.45,'1.39');fp.dimV(n,W-n,Ln,Ln+.45,'3.15');fp.note(n+.08,W-n-.08,2.1,W-n-.6,'Ø.250 RELIEF, 4×');
+  const b=B5,{Ln,Wn,n}=b;
+  const fp=V(80,120,56);fp.title(0,-1.05,'FLAT PATTERN, 1/8 1100-O ALUMINUM');
+  fp.poly(b.outline,'al');
+  [[n,n],[Ln-n,n],[Ln-n,Wn-n],[n,Wn-n]].forEach(([x,y])=>fp.circ(x,y,.125,'holeF'));
+  [...b.tabHoles,...b.wallHoles].forEach(([x,y])=>{fp.circ(x,y,.0805,'holeF');fp.cross(x,y,.16)});
+  fp.line(n,n,Ln-n,n,'bend');fp.line(n,Wn-n,Ln-n,Wn-n,'bend');fp.line(n,b.ey0,n,b.ey1,'bend');fp.line(Ln-n,b.ey0,Ln-n,b.ey1,'bend');
+  [[b.tx0,b.tx1,b.ey0],[b.tx0,b.tx1,b.ey1],[b.rx0,b.rx1,b.ey0],[b.rx0,b.rx1,b.ey1]].forEach(([a,c,y])=>fp.line(a,y,c,y,'bend'));
+  fp.text(Ln/2,n/2+.08,'BEND 3 · UP 90°');fp.text(Ln/2,Wn-n/2+.08,'BEND 4 · UP 90°');fp.text(n/2+.05,Wn/2+.08,'BEND 1');fp.text(Ln-n/2-.05,Wn/2+.08,'BEND 2');
+  fp.text(Ln/2,Wn/2-.05,'BASE','vt');fp.text(Ln/2,Wn/2+.3,'5.25 × 3.38 OUTSIDE','dt');
+  fp.text((b.tx0+b.tx1)/2,b.ey0-.62,'TAB','lbl');
+  fp.dimH(0,Ln,Wn,Wn+.45,'7.80');fp.dimV(0,Wn,0,-.55,'5.93');fp.dimH(b.lx0,b.lx1,0,-.4,'5.25');fp.dimV(b.ey0,b.ey1,Ln,Ln+.45,'3.13');
+  fp.note(b.tabHoles[0][0],b.tabHoles[0][1],.2,-.35,'Ø.161 RIVET HOLE, 8×');fp.note(n+.08,Wn-n-.08,2.1,Wn-n-.6,'Ø.250 RELIEF, 4×');
   const c=V(640,150,60);c.title(0,-.9,'SECTION, LID ON TRAY');
   c.secRect(0,.25,.125,1.5,'al');c.secRect(3.25,.25,.125,1.5,'al');c.secRect(.125,1.625,3.125,.125,'al');
-  c.secRect(0,0,3.375,.125,'wd');c.secRect(.15,.125,3.075,.125,'wd');
+  c.rect(.125,.6,.125,1.0,'al2');c.rect(3.125,.6,.125,1.0,'al2');
+  c.secRect(0,0,3.375,.125,'wd');c.secRect(.2875,.125,2.8,.125,'wd');
   c.dimH(0,3.375,1.75,2.1,'3.38');c.dimV(.25,1.75,3.375,3.85,'1.50');
-  c.balloon(3.0,.06,3.7,-.3,'B');c.balloon(2.9,.19,3.7,.25,'C');c.balloon(3.31,1.0,3.7,1.0,'A');
-  c.note(.2,.19,.5,.85,'LIP C DROPS INSIDE THE RIM');c.text(.5,1.2,'.025 CLEAR EACH SIDE','dt','start');
-  return svg(1020,500,'B5 folded aluminum tray: flat pattern and lid section',[fp,c])};
-
+  c.balloon(3.0,.06,3.7,-.3,'B');c.balloon(2.9,.19,3.7,.25,'C');c.balloon(3.31,1.3,3.7,1.3,'A');
+  c.note(.6,.19,.6,.85,'LIP C CLEARS THE CORNER TABS');c.note(.19,1.0,.6,1.25,'TAB BEHIND THE CUT, RIVETED');
+  return svg(1020,500,'B5 folded aluminum tray: flat pattern with rivet tabs and lid section',[fp,c])};
 /* Three-quarter (isometric) sample views, built from real parts. x runs right-back, y left-front, z up.
    Faces at x-max, y-max and z-max face the viewer. Parts are sorted back to front before drawing. */
 const MAT={wood:['wd','wd2','wd3'],floor:['wdf','wd2','wd3'],alu:['al3','al','al2'],acr:['ac','ac2','ac3'],pr:['pr','pr2','pr3']};
@@ -158,31 +193,56 @@ D3.b1=()=>{const v=ISO(),L=8,W=3,H=2.25,t=.125,s0=1.87,s1=2.0;
    .part(2.6,t+.015,s0,L,W-t-.015,s0+.125,'acr')                         // lid, inside the slot
    .part(L,t+.015,s0,10.45,W-t-.015,s0+.125,'acr',v=>v.top(L+.15,10.2,.6,2.4,s0+.125,'eng'));  // lid, slid out past the end
   return isoSvg(v,'B1 laser pencil box with the acrylic lid partly slid out')};
-D3.b2=()=>{const v=ISO(),L=9,W=3,H=2.5,t=.5,g0=2.125,g1=2.25;
-  v.part(t,t,0,L-t,W-t,.25,'floor')
-   .part(0,0,0,L,t,H,'wood')
-   .part(0,t,0,t,W-t,H,'wood')
-   .part(L-t,t,0,L,W-t,g0,'wood')
-   .part(0,W-t,0,L,W,H,'wood')
-   .part(2.3,t,g0,L,W-t,g1,'acr')
-   .part(L,.33,g0,10.95,W-.33,g1,'acr');
-  return isoSvg(v,'B2 router-table pencil box with the lid partly slid out')};
-D3.b3=()=>{const v=ISO(),L=5.5,D=3.5,H=3.5,x0=.625,x1=4.875,z0=.875,z1=2.875,out=1.4,w=.375;
-  v.part(0,0,0,x0,D,H,'wood',v=>v.line([0,D,1.875],[x0,D,1.875],'thin'))     // left of the opening, with the glued entry kerf
-   .part(x1,0,0,L,D,H,'wood',v=>v.line([L,.25,0],[L,.25,H],'thin'))         // right of the opening, back slice line
-   .part(x0,0,0,x1,D,z0,'wood').part(x0,0,z1,x1,D,H,'wood').part(x0,0,z0,x1,.25,z1,'wood');
-  const y0=.25+out,y1=D+out;                                                  // drawer pulled out
-  v.part(x0,y0,z0,x1,y1,z0+w,'floor').part(x0,y0,z0+w,x1,y0+w,z1,'wood').part(x0,y0+w,z0+w,x0+w,y1-w,z1,'wood')
-   .part(x1-w,y0+w,z0+w,x1,y1-w,z1,'wood').part(x0,y1-w,z0+w,x1,y1,z1,'wood')
-   .part(2.0,y1,1.69,3.5,y1+.25,2.06,'alu');
-  return isoSvg(v,'B3 bandsaw box with the drawer pulled out')};
 D3.b4=()=>{const v=ISO(),z=2.5;
   v.part(0,0,0,6,4,2.375,'wood',v=>{fingersOnY(0,.125,0,2.375,4,.25,0)(v);v.xf(3.875,4,0,.25,6,'wd3');v.xf(3.875,4,.5,.75,6,'wd3');v.xf(3.875,4,1,1.25,6,'wd3');v.xf(3.875,4,1.5,1.75,6,'wd3');v.xf(3.875,4,2,2.25,6,'wd3')})
    .part(0,0,2.375,6,4,z,'alu',v=>{v.top(.75,3.25,.75,1.75,z,'cav');[[.375,.375],[5.625,.375],[.375,3.625],[5.625,3.625]].forEach(([x,y])=>v.circ(x,y,.09,z,'kn'));
      v.circ(2.75,2.9,.1,z,'led');[1.25,2].forEach(x=>{v.circ(x,2.9,.16,z,'kn');v.line([x,2.9,z],[x,3.15,z+.45],'lever')});v.cyl(4.5,1.25,.38,z,.45,'pr')});
   return isoSvg(v,'B4 instrument-panel box')};
-D3.b5=()=>{const v=ISO(),L=5.25,W=3.375,H=1.5,t=.125,lz=2.4;
+/* Extruded profiles for curved parts (bandsaw box). Profile [x,z] CCW, extruded along y from y0 to y1. */
+let ISO_ID=0;
+const area2=p=>p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a[0]*b[1]-b[0]*a[1]},0);
+function extrude(v,prof,y0,y1,m,hole){
+  if(area2(prof)<0)prof=prof.slice().reverse();
+  const [tc,fc,rc]=MAT[m],quads=[];
+  for(let i=0;i<prof.length;i++){const a=prof[i],b=prof[(i+1)%prof.length],dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz)||1,nx=dz/L,nz=-dx/L;
+    if(nx+nz<=1e-6)continue;quads.push({a,b,nx,nz,k:(a[0]+b[0])/2+(a[1]+b[1])/2})}
+  quads.sort((p,q)=>p.k-q.k).forEach(q=>v.poly([[q.a[0],y0,q.a[1]],[q.b[0],y0,q.b[1]],[q.b[0],y1,q.b[1]],[q.a[0],y1,q.a[1]]],(q.nz>.6?tc:q.nx>.6?rc:fc)+' ns'));
+  quads.forEach(q=>v.line([q.a[0],y0,q.a[1]],[q.b[0],y0,q.b[1]],'edge'));
+  const vis=i=>{const a=prof[i],b=prof[(i+1)%prof.length],dx=b[0]-a[0],dz=b[1]-a[1];return dz-dx>1e-6};
+  prof.forEach((p,i)=>{if(vis((i-1+prof.length)%prof.length)!==vis(i))v.line([p[0],y0,p[1]],[p[0],y1,p[1]],'edge')});
+  capPath(v,prof,y1,hole,fc);
+}
+function capPath(v,prof,y,hole,cls){const d=pts=>'M'+pts.map(([x,z])=>v.P(x,y,z).join(',')).join('L')+'Z';v.o.push(`<path d="${d(prof)}${hole?d(hole):''}" fill-rule="evenodd" class="${cls}"/>`)}
+function clipStart(v,prof,y,evenHole){const id='isoc'+(++ISO_ID),d=pts=>'M'+pts.map(([x,z])=>v.P(x,y,z).join(',')).join('L')+'Z';v.o.push(`<clipPath id="${id}"><path d="${d(prof)}${evenHole?d(evenHole):''}" clip-rule="evenodd"/></clipPath><g clip-path="url(#${id})">`)}
+function grain(v,x0,x1,y,zs){zs.forEach((z0,k)=>{const p=[];for(let x=x0;x<=x1+1e-6;x+=.1)p.push(v.P(x,y,z0+.05*Math.sin(x*1.7+k*1.3)+.03*Math.sin(x*4.1+k)).join(','));v.o.push(`<polyline points="${p.join(' ')}" class="grain"/>`)})}
+D3.b2=()=>{const v=ISO(),L=9,W=3,H=2.5,t=.5,g0=2.125,g1=2.25,screws=y=>v=>[[.25,.75],[.25,1.75],[L-.25,.75],[L-.25,1.75]].forEach(([x,z])=>{const p=[];for(let k=0;k<16;k++){const a=k/16*2*Math.PI;p.push([x+.12*Math.cos(a),y,z+.12*Math.sin(a)])}v.poly(p,'screw')});
+  v.part(t,t,.25,L-t,W-t,.5,'floor')
+   .part(0,0,0,L,t,H,'wood')
+   .part(0,t,0,t,W-t,H,'wood')
+   .part(L-t,t,0,L,W-t,g0,'wood')
+   .part(0,W-t,0,L,W,H,'wood',screws(W))
+   .part(2.3,t,g0,L,W-t,g1,'acr')
+   .part(L,.33,g0,10.95,W-.33,g1,'acr');
+  return isoSvg(v,'B2 Douglas fir pencil box, screwed corners, lid partly slid out')};
+D3.b3=()=>{const v=ISO(),D=3.5,out=1.35,yb=.25+out,yf=3.25+out;
+  const zs=[.35,.8,1.25,1.7,2.15,2.6,3.05];
+  extrude(v,B3.outer,0,D,'wood',null);                       // body sides; front cap drawn later
+  v.o.pop();
+  capPath(v,B3.dr,D,null,'cav');                              // the tunnel behind the drawer
+  clipStart(v,B3.dr,D);
+  extrude(v,B3.dr,yb,yb+.25,'wood');extrude(v,B3.core,yb+.25,D,'wood');
+  v.o.push('</g>');
+  capPath(v,B3.outer,D,B3.dr,'wd2');clipStart(v,B3.outer,D,B3.dr);grain(v,0,5.5,D,zs);v.o.push('</g>');
+  v.line([0,D,1.6],[.7,D,1.6],'thin');
+  extrude(v,B3.core,D,yf,'wood');extrude(v,B3.dr,yf,yf+.25,'wood');
+  clipStart(v,B3.dr,yf+.25);grain(v,.7,4.8,yf+.25,zs);v.o.push('</g>');
+  v.part(2.0,yf+.25,1.42,3.5,yf+.5,1.79,"alu");
+  return isoSvg(v,'B3 bandsaw box with a curved body and the drawer pulled out')};
+D3.b5=()=>{const v=ISO(),L=5.25,W=3.375,H=1.5,t=.125,lz=2.45,tz0=.41,tz1=1.46,tl=.6,riv=y=>v=>[.46,L-.46].forEach(x=>{const p=[];for(let k=0;k<16;k++){const a=k/16*2*Math.PI;p.push([x+.1*Math.cos(a),y,.94+.1*Math.sin(a)])}v.poly(p,'rivet')});
   v.part(0,0,0,L,W,t,'alu')
-   .part(0,0,t,L,t,H,'alu').part(0,t,t,t,W-t,H,'alu').part(L-t,t,t,L,W-t,H,'alu').part(0,W-t,t,L,W,H,'alu')
-   .part(.15,.15,lz,L-.15,W-.15,lz+.125,'wood').part(0,0,lz+.125,L,W,lz+.25,'wood');
-  return isoSvg(v,'B5 folded aluminum tray with the plywood lid lifted')};
+   .part(0,0,t,L,t,H,'alu').part(0,t,t,t,W-t,H,'alu').part(L-t,t,t,L,W-t,H,'alu')
+   .part(t,t,tz0,t+tl,2*t,tz1,'alu').part(L-t-tl,t,tz0,L-t,2*t,tz1,'alu')
+   .part(t,W-2*t,tz0,t+tl,W-t,tz1,'alu').part(L-t-tl,W-2*t,tz0,L-t,W-t,tz1,'alu')
+   .part(0,W-t,t,L,W,H,'alu',riv(W))
+   .part(.15,.2875,lz,L-.15,W-.2875,lz+.125,'wood').part(0,0,lz+.125,L,W,lz+.25,'wood');
+  return isoSvg(v,'B5 folded aluminum tray with riveted corner tabs inside and the lid lifted')};

@@ -30,3 +30,8 @@
 .led{fill:var(--red);stroke:var(--ink);stroke-width:.8}
 .lever{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
 .wdf{fill:var(--wood2);stroke:var(--ink);stroke-width:.8}
+.grain{fill:none;stroke:var(--wood3);stroke-width:.9;stroke-opacity:.55}
+.screw{fill:var(--alu);stroke:var(--ink);stroke-width:.8}
+.rivet{fill:var(--alu3);stroke:var(--ink);stroke-width:.8}
+.ns{stroke-width:.7}.ns.wd{stroke:var(--wood)}.ns.wd2{stroke:var(--wood2)}.ns.wd3{stroke:var(--wood3)}.ns.wdf{stroke:var(--wood2)}
+.edge{stroke:var(--ink);stroke-width:1}
