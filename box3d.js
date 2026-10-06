@@ -12,20 +12,36 @@ const Box3D = (() => {
   /* Part builders. Everything is added to `parts` with an explode vector. */
   function kit(T){
     const ink = new T.LineBasicMaterial({ color: css('--ink'), transparent: true, opacity: .8 });
-    const std = (c, o = {}) => new T.MeshStandardMaterial(Object.assign({ color: css(c), roughness: .85, metalness: 0, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }, o));
+    const std = (c, o = {}) => new T.MeshStandardMaterial(Object.assign({ color: css(c), roughness: .85, metalness: 0, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1, side: T.DoubleSide }, o));
     const M = { wood: std('--wood'), wood2: std('--wood2'), wood3: std('--wood3'), cav: std('--cav'), pr: std('--print', { roughness: .6 }),
       alu: std('--alu', { roughness: .35, metalness: .55 }), steel: std('--alu2', { roughness: .3, metalness: .7 }), brass: new T.MeshStandardMaterial({ color: '#C9A13B', roughness: .3, metalness: .8 }),
       acr: std('--acr', { transparent: true, opacity: .55, roughness: .15, depthWrite: false }), red: std('--red', { roughness: .4 }), knob: std('--ink', { roughness: .5 }) };
     const parts = [], V2 = p => p.map(([a, b]) => new T.Vector2(a, b));
     const shape = (pts, holes = []) => { const s = new T.Shape(V2(pts)); holes.forEach(h => s.holes.push(new T.Path(V2(h)))); return s; };
     const ext = (s, d) => new T.ExtrudeGeometry(s, { depth: d, bevelEnabled: false, curveSegments: 6 });
+    const extras = [], mk = (geo, m, edge = 25) => { const o = new T.Mesh(geo, M[m]); if (edge) o.add(new T.LineSegments(new T.EdgesGeometry(geo, edge), ink)); return o; };
     const add = (geo, m, pos, o = {}) => {
-      const mesh = new T.Mesh(geo, M[m]); mesh.add(new T.LineSegments(new T.EdgesGeometry(geo, 25), ink));
+      const mesh = geo.isObject3D ? geo : mk(geo, m);
       mesh.position.copy(pos); mesh.userData = { base: pos.clone(), ex: new T.Vector3(...to3(o.ex || [0, 0, 0])), dr: !!o.dr };
       parts.push(mesh); return mesh;
     };
     const to3 = ([x, y, z]) => [x, z, y];                      // model (x, y-front, z-up) -> three (x, y-up, z-front)
-    return { M, parts,
+    // #6 flat-head wood screw, 1-1/4 long: head, cross recess, threads. Built pointing down -Y from the head top at 0.
+    const screwObj = () => {
+      const p = [[0, 0], [.131, 0], [.131, -.012], [.069, -.08], [.069, -.36]];
+      for (let h = -.36; h > -1.12; h -= .055) p.push([.048, h - .02], [.069, h - .055]);
+      p.push([.03, -1.2], [0, -1.25]);
+      const g = new T.Group(); g.add(mk(new T.LatheGeometry(V2(p), 20), 'steel', 50));
+      [0, Math.PI / 2].forEach(a => { const c = new T.Mesh(new T.BoxGeometry(.17, .05, .028), M.cav); c.rotation.y = a; c.position.y = -.02; g.add(c); });
+      return g;
+    };
+    return { T, M, ink, parts, extras, mk, raw: o => (extras.push(o), o),
+      // screw with its head flush at model (x, y, z), pointing +y (dir 1) or -y (dir -1)
+      screw(x, y, z, dir, o){ const sc = screwObj(); sc.rotation.x = -dir * Math.PI / 2; return add(sc, null, new T.Vector3(x, z, y), o); },
+      // countersink cone surface in the face at y, narrowing toward +dir
+      csink(x, y, z, r0, r1, d, dir, m, o){ const g = new T.LatheGeometry(V2([[r0, 0], [r1, -d]]), 20); g.rotateX(-dir * Math.PI / 2); return add(mk(g, m, 0), null, new T.Vector3(x, z, y), o); },
+      // dark disc on a face at y facing +y (dir 1) or -y (dir -1): pilot holes
+      disc(x, y, z, r, dir, o){ const g = new T.CircleGeometry(r, 16); if (dir < 0) g.rotateY(Math.PI); return add(mk(g, 'cav', 0), null, new T.Vector3(x, z, y), o); },
       // profile [x, z] extruded from front-to-back depth y0..y1
       slab(prof, y0, y1, m, o = {}){ return add(ext(shape(prof, o.holes), y1 - y0), m, new T.Vector3(0, 0, y0), o); },
       // profile [y, z] extruded along x from x0..x1
@@ -50,14 +66,19 @@ const Box3D = (() => {
       k.box(0, W - t, 0, L, W, H, 'wood', { ex: [0, 1.4, 0] });                                     // front outer
       k.box(t + .01, t + .015, s0, L, W - t - .015, s1, 'acr', { ex: [2.2, 0, .9] });               // lid slides out the end
     },
-    b2(k){ const L = 9, W = 3, H = 2.5, t = .5, g0 = 2.125, g1 = 2.25;
-      const screws = (y, dy) => [[.25, .75], [.25, 1.75], [L - .25, .75], [L - .25, 1.75]].forEach(([x, z]) => k.cyl(x, y + dy * .05, z, .12, .1, 'y', 'steel', { ex: [0, dy * 2.3, 0] }));
-      k.box(t, t, .25, L - t, W - t, .5, 'wood2', { ex: [0, 0, -1] });                              // ply bottom in the dado
-      k.box(0, 0, 0, L, t, H, 'wood', { ex: [0, -1.3, 0] }); screws(0, -1);
-      k.box(0, t, 0, t, W - t, H, 'wood', { ex: [-1, 0, 0] });
-      k.box(L - t, t, 0, L, W - t, g0, 'wood', { ex: [1, 0, 0] });
-      k.box(0, W - t, 0, L, W, H, 'wood', { ex: [0, 1.3, 0] }); screws(W, 1);
-      k.box(.34, .33, g0, L, W - .33, g1, 'acr', { ex: [2.4, 0, 1] });
+    b2(k){ const L = 9, W = 3, H = 2.5, t = .5, g0 = 2.125, g1 = 2.25, cs = .07, rC = .135, rH = .07, rP = .047;
+      const at = [[.25, .75], [.25, 1.75], [L - .25, .75], [L - .25, 1.75]], side = rect(0, 0, L, H);
+      // side = countersink layer + clearance-hole layer. Ends stay put; sides and screws slide straight out so they line up.
+      const sideWithHoles = (face, dir) => { const ex = [0, -dir * 1.7, 0], inner = face + dir * cs, far = face + dir * t;
+        k.slab(side, Math.min(face, inner), Math.max(face, inner), 'wood', { holes: at.map(([x, z]) => ring(x, z, rC, 20)), ex });
+        k.slab(side, Math.min(inner, far), Math.max(inner, far), 'wood', { holes: at.map(([x, z]) => ring(x, z, rH, 16)), ex });
+        at.forEach(([x, z]) => { k.csink(x, face, z, rC, rH, cs, dir, 'wood3', { ex }); k.screw(x, face, z, dir, { ex: [0, -dir * 3.4, 0] }); });
+      };
+      k.box(t, t, .25, L - t, W - t, .5, 'wood2', { ex: [0, 0, -1.1] });                            // ply bottom in the dado
+      sideWithHoles(0, 1); sideWithHoles(W, -1);
+      k.box(0, t, 0, t, W - t, H, 'wood'); k.box(L - t, t, 0, L, W - t, g0, 'wood');                // ends
+      at.forEach(([x, z]) => { k.disc(x, t - .002, z, rP, -1); k.disc(x, W - t + .002, z, rP, 1); }); // pilot holes in the end grain
+      k.box(.34, .33, g0, L, W - .33, g1, 'acr', { ex: [2.4, 0, 1.2] });
     },
     b3(k){ const D = 3.5, f = B3.foot;
       k.slab(B3.outer, 0, .25, 'wood2', { ex: [0, -1.6, 0] });                                      // back slice
@@ -82,18 +103,50 @@ const Box3D = (() => {
       [1.25, 2].forEach(x => { k.cyl(x, 2.9, z + .05, .16, .1, 'z', 'steel', { ex: [0, 0, 2.2] }); k.cyl(x, 2.9, z + .3, .035, .45, 'z', 'steel', { ex: [0, 0, 2.2] }); });
       k.cyl(2.75, 2.9, z + .08, .1, .16, 'z', 'red', { ex: [0, 0, 2.2] });                          // LED
     },
-    b5(k){ const L = 5.25, W = 3.375, H = 1.5, t = .125, ro = .25, ri = .125, tz0 = .41, tz1 = 1.46, tl = .6;
-      const arc = (cx, cz, r, a0, a1, n = 8) => Array.from({ length: n + 1 }, (_, i) => { const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180; return [cx + r * Math.cos(a), cz + r * Math.sin(a)]; });
-      const bend = [...arc(ro, ro, ro, 180, 270), ...arc(ro, ro, ri, 270, 180)], mir = (p, m) => p.map(([u, w]) => [m - u, w]);
-      k.box(ro, ro, 0, L - ro, W - ro, t, 'alu');                                                   // floor
-      k.slabX(bend, ro, L - ro, 'alu'); k.slabX(mir(bend, W), ro, L - ro, 'alu');                   // long bends
-      k.slab(bend, ro, W - ro, 'alu'); k.slab(mir(bend, L), ro, W - ro, 'alu');                     // end bends
-      k.box(0, 0, ro, L, t, H, 'alu'); k.box(0, W - t, ro, L, W, H, 'alu');                         // long walls
-      k.box(0, t, ro, t, W - t, H, 'alu'); k.box(L - t, t, ro, L, W - t, H, 'alu');                 // end walls
-      [[t, t + tl], [L - t - tl, L - t]].forEach(([a, b]) => { k.box(a, t, tz0, b, 2 * t, tz1, 'alu'); k.box(a, W - 2 * t, tz0, b, W - t, tz1, 'alu'); });  // corner tabs
-      [.46, L - .46].forEach(x => { k.cyl(x, W + .02, .94, .1, .04, 'y', 'steel', { ex: [0, .9, 0] }); k.cyl(x, -.02, .94, .1, .04, 'y', 'steel', { ex: [0, -.9, 0] }); });  // rivet heads
-      k.box(.2875, .2875, H - .125, L - .2875, W - .2875, H, 'wood', { ex: [0, 0, 1.5] });           // lid lip
-      k.box(0, 0, H, L, W, H + .125, 'wood2', { ex: [0, 0, 1.5] });                                  // lid
+    b5(k){ const T = k.T, L = 5.25, W = 3.375, H = 1.5, t = .125, ro = .25, ri = .125, tz0 = .41, tz1 = 1.46, tl = .6;
+      // Slider: lid lifts and rivets pull, then the blank unfolds in reverse build order: long walls, end walls, tabs.
+      // Works in three's frame (X right, Y up, Z front). Each wall hangs off a floor edge through a bend whose neutral
+      // length stays constant, so the flat state comes out at the real blank size.
+      const rn = ri + t / 2, s = rn * Math.PI / 2, Lw = H - ro, root = k.raw(new T.Group());
+      const boxG = (x0, x1, y0, y1, z0, z1) => new T.BoxGeometry(x1 - x0, y1 - y0, z1 - z0).translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+      const holeDisc = (x, y, z, up) => { const g = new T.CircleGeometry(.08, 16); g.rotateX(up ? -Math.PI / 2 : Math.PI / 2); const o = k.mk(g, 'cav', 0); o.position.set(x, y, z); return o; };
+      root.add(k.mk(boxG(ro, L - ro, 0, t, ro, W - ro), 'alu'));                                  // floor
+      const bendPts = th => { const kap = Math.max(th, 1e-4) / s, out = [], inn = [];
+        for (let i = 0; i <= 12; i++) { const f = kap * s * i / 12, pz = Math.sin(f) / kap, py = (1 - Math.cos(f)) / kap, cz = -Math.sin(f), cy = Math.cos(f);
+          out.push([pz - cz * t / 2, py - cy * t / 2]); inn.push([pz + cz * t / 2, py + cy * t / 2]); }
+        return { pts: [...out, ...inn.reverse()], end: [Math.sin(kap * s) / kap, (1 - Math.cos(kap * s)) / kap] }; };
+      // hinge frame: local X along the edge, Z outward from the floor, Y up (the inside face)
+      const flap = (px, pz, rotY, bl, wl) => {
+        const h = new T.Group(); h.position.set(px, t / 2, pz); h.rotation.y = rotY; root.add(h);
+        const bend = new T.Mesh(new T.BufferGeometry(), k.M.alu), bE = new T.LineSegments(new T.BufferGeometry(), k.ink); bend.add(bE); h.add(bend);
+        const wall = new T.Group(); h.add(wall); wall.add(k.mk(boxG(-wl / 2, wl / 2, -t / 2, t / 2, 0, Lw), 'alu'));
+        return { wall, set(th){ const b = bendPts(th), g = new T.ExtrudeGeometry(new T.Shape(b.pts.map(([a, c]) => new T.Vector2(a, c))), { depth: bl, bevelEnabled: false });
+          g.rotateY(-Math.PI / 2); g.translate(bl / 2, 0, 0);
+          bend.geometry.dispose(); bend.geometry = g; bE.geometry.dispose(); bE.geometry = new T.EdgesGeometry(g, 25);
+          wall.position.set(0, b.end[1], b.end[0]); wall.rotation.x = -th; } };
+      };
+      const longs = [flap(L / 2, ro, Math.PI, L - 2 * ro, L), flap(L / 2, W - ro, 0, L - 2 * ro, L)];
+      const ends = [flap(ro, W / 2, -Math.PI / 2, W - 2 * ro, W - 2 * t), flap(L - ro, W / 2, Math.PI / 2, W - 2 * ro, W - 2 * t)];
+      const hw = (W - 2 * t) / 2, rz = .94 - ro, rx = L / 2 - .46, tabs = [], rivets = [];
+      ends.forEach(e => [1, -1].forEach(sg => {                                                   // corner tabs fold off the end walls
+        const tg = new T.Group(); tg.position.set(sg * hw, -t / 2, 0); e.wall.add(tg);
+        tg.add(k.mk(boxG(sg > 0 ? 0 : -tl, sg > 0 ? tl : 0, 0, t, tz0 - ro, tz1 - ro), 'alu'));
+        tg.add(holeDisc(sg * (.46 - t), -.002, rz, false), holeDisc(sg * (.46 - t), t + .002, rz, true));
+        tabs.push([tg, sg]); }));
+      longs.forEach(l => [1, -1].forEach(sg => {                                                  // rivet holes + pop rivets, head outside
+        l.wall.add(holeDisc(sg * rx, -t / 2 - .002, rz, false), holeDisc(sg * rx, t / 2 + .002, rz, true));
+        const r = new T.Group(); r.position.set(sg * rx, 0, rz);
+        r.add(k.mk(new T.CylinderGeometry(.155, .155, .04, 20).translate(0, -t / 2 - .02, 0), 'steel'), k.mk(new T.CylinderGeometry(.078, .078, .32, 14).translate(0, .1, 0), 'steel'));
+        l.wall.add(r); rivets.push(r); }));
+      const lid = new T.Group(); root.add(lid);
+      lid.add(k.mk(boxG(.2875, L - .2875, H - .125, H, .2875, W - .2875), 'wood'), k.mk(boxG(0, L, H, H + .125, 0, W), 'wood2'));
+      const sm = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }, Q = Math.PI / 2;
+      return { update(v){
+        const p1 = sm(v / .3), pl = sm((v - .3) / .3), pe = sm((v - .55) / .3), pt = sm((v - .8) / .2);
+        lid.position.y = 2 * p1; rivets.forEach(r => r.position.y = -.9 * p1);
+        longs.forEach(l => l.set(Q * (1 - pl))); ends.forEach(e => e.set(Q * (1 - pe)));
+        tabs.forEach(([tg, sg]) => tg.rotation.z = sg * Q * (1 - pt));
+      } };
     }
   };
 
@@ -115,11 +168,12 @@ const Box3D = (() => {
     const sun = new T.DirectionalLight(0xffffff, 1.4); sun.position.set(4, 9, 6); scene.add(sun);
 
     const k = kit(T), info = MODELS[id](k) || {}, g = new T.Group();
-    k.parts.forEach(p => g.add(p));
-    const set = v => k.parts.forEach(p => { const u = p.userData;
+    k.parts.forEach(p => g.add(p)); k.extras.forEach(o => g.add(o));
+    const set = v => { k.parts.forEach(p => { const u = p.userData;
       p.position.copy(u.base);
       if (mode === 'drawer') { if (u.dr) p.position.z += info.open * v; }
       else p.position.addScaledVector(u.ex, v); });
+      if (mode !== 'drawer' && info.update) info.update(v); };
     // fit the camera to the fully open/exploded model so nothing leaves the frame while sliding
     const bb = new T.Box3(); set(0); bb.setFromObject(g); set(1); bb.union(new T.Box3().setFromObject(g));
     const ctr = bb.getCenter(new T.Vector3()), rad = bb.getBoundingSphere(new T.Sphere()).radius;

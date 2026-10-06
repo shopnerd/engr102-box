@@ -58,7 +58,7 @@ const B3=(()=>{
   const R=.625,dr=[[1.325,.7],[4.175,.7],...arcPts(4.175,1.325,R,-90,0).slice(1),...arcPts(4.175,1.875,R,0,90),...arcPts(1.325,1.875,R,90,180),...arcPts(1.325,1.325,R,180,270).slice(0,-1)];
   const core=[[1.325,.7],[4.175,.7],...arcPts(4.175,1.325,R,-90,0).slice(1),...arcPts(4.175,1.875,R,0,90),[4.05,2.5],[4.05,1.7],...arcPts(3.425,1.7,R,0,-90).slice(1),[2.075,1.075],...arcPts(2.075,1.7,R,-90,-180).slice(1),[1.45,2.5],...arcPts(1.325,1.875,R,90,180),...arcPts(1.325,1.325,R,180,270).slice(1,-1)];
   const top=Math.max(...outer.map(p=>p[1]));
-  const foot=.25,feet=[[.9,1.65,.35,1.1],[3.85,4.6,.35,1.1],[.9,1.65,2.4,3.15],[3.85,4.6,2.4,3.15]];   // scrap feet, .75 sq × .25
+  const foot=.25,feet=[[.95,1.7,.25,3.25],[3.8,4.55,.25,3.25]];   // two scrap runners, 3.00 × .75 × .25, front to back
   return {outer,dr,core,top,foot,feet};
 })();
 
@@ -92,14 +92,14 @@ D.b2=()=>{
 D.b3=()=>{
   const H=3.5,fl=pts=>pts.map(([x,z])=>[x,H-z]);
   const f=V(80,125,64);f.title(0,-1.15,'FRONT VIEW');
-  f.poly(fl(B3.outer),'wd');f.poly(fl(B3.dr),'drw');[.9,3.85].forEach(x=>f.rect(x,H,.75,B3.foot,'wd'));f.line(0,H-1.6,.7,H-1.6,'cut');
+  f.poly(fl(B3.outer),'wd');f.poly(fl(B3.dr),'drw');B3.feet.forEach(([x0,x1])=>f.rect(x0,H,x1-x0,B3.foot,'wd'));f.line(0,H-1.6,.7,H-1.6,'cut');
   f.poly(fl(B3.core),'hid');f.rect(2,H-1.79,1.5,.375,'al',.06);
   f.dimH(0,5.5,H+B3.foot,H+.7,'5.50');f.dimV(H,H+B3.foot,5.5,6.0,'.25');f.balloon(4.45,H+.13,5.15,H+.4,'D');f.dimV(H-B3.top,H,0,-.55,B3.top.toFixed(2)+' MAX');f.dimH(.7,4.8,H-2.5,H-2.95,'4.10');f.dimV(H-2.5,H-.7,4.8,5.95,'1.80');
   f.note(.88,H-.88,1.4,H-.25,'R.625 MIN TYP, 1/4 IN BLADE');f.note(.3,H-1.6,-.25,-.12,'ENTRY KERF, GLUE SHUT');
   f.note(1.6,H-1.35,2.3,-.45,'DRAWER HOLLOW (HIDDEN), CUT FROM THE TOP');
   f.balloon(5.05,H-1.4,5.05,H-1.4,'A');f.balloon(1.0,H-2.15,1.0,H-2.15,'B');f.balloon(3.5,H-1.6,5.05,H-.55,'C');
   const s=V(570,125,64);s.title(0,-1.15,'RIGHT SIDE VIEW');
-  s.rect(0,H-B3.top,3.5,B3.top,'wd');[.35,2.4].forEach(y=>s.rect(y,H,.75,B3.foot,'wd'));s.line(3.25,H-B3.top,3.25,H,'cutl');
+  s.rect(0,H-B3.top,3.5,B3.top,'wd');s.rect(B3.feet[0][2],H,B3.feet[0][3]-B3.feet[0][2],B3.foot,'wd');s.line(3.25,H-B3.top,3.25,H,'cutl');
   s.line(0,H-2.5,3.25,H-2.5,'hid');s.line(0,H-.7,3.25,H-.7,'hid');s.line(.25,H-2.5,.25,H-.7,'cut');s.line(3,H-2.5,3,H-.7,'cut');s.line(.25,H-1.075,3,H-1.075,'hid');
   s.dimH(0,3.5,H+B3.foot,H+.7,'3.50');s.dimH(3.25,3.5,H-B3.top,H-B3.top-.45,'.25 BACK');s.dimH(0,.25,H-2.5,H-2.95,'.25 TYP');
   const g=V(840,150,36);g.title(0,-1.4,'4×4 END GRAIN');
