@@ -44,7 +44,7 @@ main{padding-block:28px 60px;padding-inline:max(16px,4vw);max-width:1080px;margi
 .hero .thumb{background:var(--sheet);border:1px solid var(--rule);padding:8px}
 .hero .thumb svg{width:100%;height:auto;display:block}
 .hero .thumb{margin:0}
-.v3dbox{position:relative}.v3dbox canvas{width:100%;user-select:none}
+.v3dbox{position:relative}.v3dbox canvas{width:100%;user-select:none;-webkit-touch-callout:none;touch-action:none}
 .v3dctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:8px 4px 2px;font:600 .95rem var(--cond);letter-spacing:.08em;text-transform:uppercase}
 .v3dctl input{flex:1;min-width:140px;accent-color:var(--red);min-height:32px}
 .v3dctl .lm{flex-basis:100%;text-transform:none;letter-spacing:0;font-weight:400}

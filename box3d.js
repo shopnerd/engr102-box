@@ -162,7 +162,7 @@ const Box3D = (() => {
     r.setPixelRatio(Math.min(devicePixelRatio, 2)); r.setSize(W(), H());
     const el = r.domElement;
     el.setAttribute('role', 'img'); el.setAttribute('aria-label', 'Sample box 3D model. Drag to turn it.');
-    el.style.touchAction = 'pan-y'; el.style.cursor = 'grab'; el.style.display = 'block';
+    el.style.touchAction = 'none'; el.style.webkitUserSelect = 'none'; el.style.cursor = 'grab'; el.style.display = 'block';
     const scene = new T.Scene(), cam = new T.PerspectiveCamera(28, W() / H(), .1, 200);
     scene.add(new T.HemisphereLight(0xffffff, 0x8a7a66, 1.7));
     const sun = new T.DirectionalLight(0xffffff, 1.4); sun.position.set(4, 9, 6); scene.add(sun);
