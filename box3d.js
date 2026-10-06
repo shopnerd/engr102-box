@@ -1,0 +1,150 @@
+/* 3D sample models: drag to turn, one slider either opens the drawer (home page) or explodes the parts (design pages).
+   Three.js loads from a CDN on demand; if it can't, the SVG three-quarter view stays. Built from the same numbers as drawings.js.
+   Model coordinates match the drawings' iso views: x right, y toward the front, z up, inches. Each part carries an
+   explode vector `ex`; parts marked `dr` ride the drawer. */
+const Box3D = (() => {
+  const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+  let stop = () => {};
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || '#999';
+  const ring = (cx, cy, r, n = 24) => Array.from({ length: n }, (_, k) => [cx + r * Math.cos(k / n * 2 * Math.PI), cy + r * Math.sin(k / n * 2 * Math.PI)]);
+  const rect = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+
+  /* Part builders. Everything is added to `parts` with an explode vector. */
+  function kit(T){
+    const ink = new T.LineBasicMaterial({ color: css('--ink'), transparent: true, opacity: .8 });
+    const std = (c, o = {}) => new T.MeshStandardMaterial(Object.assign({ color: css(c), roughness: .85, metalness: 0, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }, o));
+    const M = { wood: std('--wood'), wood2: std('--wood2'), wood3: std('--wood3'), cav: std('--cav'), pr: std('--print', { roughness: .6 }),
+      alu: std('--alu', { roughness: .35, metalness: .55 }), steel: std('--alu2', { roughness: .3, metalness: .7 }), brass: new T.MeshStandardMaterial({ color: '#C9A13B', roughness: .3, metalness: .8 }),
+      acr: std('--acr', { transparent: true, opacity: .55, roughness: .15, depthWrite: false }), red: std('--red', { roughness: .4 }), knob: std('--ink', { roughness: .5 }) };
+    const parts = [], V2 = p => p.map(([a, b]) => new T.Vector2(a, b));
+    const shape = (pts, holes = []) => { const s = new T.Shape(V2(pts)); holes.forEach(h => s.holes.push(new T.Path(V2(h)))); return s; };
+    const ext = (s, d) => new T.ExtrudeGeometry(s, { depth: d, bevelEnabled: false, curveSegments: 6 });
+    const add = (geo, m, pos, o = {}) => {
+      const mesh = new T.Mesh(geo, M[m]); mesh.add(new T.LineSegments(new T.EdgesGeometry(geo, 25), ink));
+      mesh.position.copy(pos); mesh.userData = { base: pos.clone(), ex: new T.Vector3(...to3(o.ex || [0, 0, 0])), dr: !!o.dr };
+      parts.push(mesh); return mesh;
+    };
+    const to3 = ([x, y, z]) => [x, z, y];                      // model (x, y-front, z-up) -> three (x, y-up, z-front)
+    return { M, parts,
+      // profile [x, z] extruded from front-to-back depth y0..y1
+      slab(prof, y0, y1, m, o = {}){ return add(ext(shape(prof, o.holes), y1 - y0), m, new T.Vector3(0, 0, y0), o); },
+      // profile [y, z] extruded along x from x0..x1
+      slabX(prof, x0, x1, m, o = {}){ const g = ext(shape(prof), x1 - x0); g.rotateY(-Math.PI / 2); return add(g, m, new T.Vector3(x1, 0, 0), o); },
+      // outline [x, y] extruded up from z0..z1 (plates with holes)
+      plate(pts, z0, z1, m, o = {}){ const fl = p => p.map(([x, y]) => [x, -y]); const g = ext(shape(fl(pts), (o.holes || []).map(fl)), z1 - z0); g.rotateX(-Math.PI / 2); return add(g, m, new T.Vector3(0, z0, 0), o); },
+      box(x0, y0, z0, x1, y1, z1, m, o){ const g = new T.BoxGeometry(x1 - x0, z1 - z0, y1 - y0); return add(g, m, new T.Vector3((x0 + x1) / 2, (z0 + z1) / 2, (y0 + y1) / 2), o); },
+      // cylinder; axis 'z' (up) or 'y' (front-back)
+      cyl(cx, cy, cz, r, h, axis, m, o){ const g = new T.CylinderGeometry(r, r, h, 20); if (axis === 'y') g.rotateX(Math.PI / 2); return add(g, m, new T.Vector3(cx, cz, cy), o); }
+    };
+  }
+
+  /* One builder per design. Return { open } for a drawer distance when the model has one. */
+  const MODELS = {
+    b1(k){ const L = 8, W = 3, H = 2.25, t = .125, s0 = 1.87, s1 = 2.0;
+      k.box(t, t, 0, L - t, W - t, t, 'wood2', { ex: [0, 0, -1] });                               // bottom
+      k.box(0, 0, 0, L, t, H, 'wood', { ex: [0, -1.4, 0] });                                        // back outer
+      k.box(t, t, t, L - t, 2 * t, s0, 'wood', { ex: [0, -.8, 0] }); k.box(t, t, s1, L - t, 2 * t, H, 'wood', { ex: [0, -.8, 0] });
+      k.box(0, t, 0, t, W - t, H, 'wood', { ex: [-1.2, 0, 0] });                                    // closed end
+      k.box(L - t, t, 0, L, W - t, s0, 'wood', { ex: [1.2, 0, 0] });                                // lid-exit end
+      k.box(t, W - 2 * t, t, L - t, W - t, s0, 'wood', { ex: [0, .8, 0] }); k.box(t, W - 2 * t, s1, L - t, W - t, H, 'wood', { ex: [0, .8, 0] });
+      k.box(0, W - t, 0, L, W, H, 'wood', { ex: [0, 1.4, 0] });                                     // front outer
+      k.box(t + .01, t + .015, s0, L, W - t - .015, s1, 'acr', { ex: [2.2, 0, .9] });               // lid slides out the end
+    },
+    b2(k){ const L = 9, W = 3, H = 2.5, t = .5, g0 = 2.125, g1 = 2.25;
+      const screws = (y, dy) => [[.25, .75], [.25, 1.75], [L - .25, .75], [L - .25, 1.75]].forEach(([x, z]) => k.cyl(x, y + dy * .05, z, .12, .1, 'y', 'steel', { ex: [0, dy * 2.3, 0] }));
+      k.box(t, t, .25, L - t, W - t, .5, 'wood2', { ex: [0, 0, -1] });                              // ply bottom in the dado
+      k.box(0, 0, 0, L, t, H, 'wood', { ex: [0, -1.3, 0] }); screws(0, -1);
+      k.box(0, t, 0, t, W - t, H, 'wood', { ex: [-1, 0, 0] });
+      k.box(L - t, t, 0, L, W - t, g0, 'wood', { ex: [1, 0, 0] });
+      k.box(0, W - t, 0, L, W, H, 'wood', { ex: [0, 1.3, 0] }); screws(W, 1);
+      k.box(.34, .33, g0, L, W - .33, g1, 'acr', { ex: [2.4, 0, 1] });
+    },
+    b3(k){ const D = 3.5, f = B3.foot;
+      k.slab(B3.outer, 0, .25, 'wood2', { ex: [0, -1.6, 0] });                                      // back slice
+      k.slab(B3.outer, .25, D, 'wood', { holes: [B3.dr] });                                         // body
+      k.slab(B3.dr, .25, .5, 'wood2', { dr: 1, ex: [0, -.95, 0] });                                 // drawer back
+      k.slab(B3.core, .5, 3.25, 'wood', { dr: 1, ex: [0, 2.6, 0] });                                // hollowed core
+      k.slab(B3.dr, 3.25, D, 'wood2', { dr: 1, ex: [0, 3.4, 0] });                                  // drawer front
+      k.box(2, D, 1.42, 3.5, D + .25, 1.79, 'alu', { dr: 1, ex: [0, 4.1, 0] });                     // pull
+      B3.feet.forEach(([x0, x1, y0, y1]) => k.box(x0, y0, -f, x1, y1, 0, 'wood3', { ex: [0, 0, -.8] }));
+      return { open: 2.6 };
+    },
+    b4(k){ const L = 6, Wd = 4, zb = 2.375, z = 2.5, w = .1, bosses = [[.375, .375], [L - .375, .375], [.375, Wd - .375], [L - .375, Wd - .375]];
+      k.plate(rect(0, 0, L, Wd), 0, w, 'pr');                                                       // printed floor
+      k.plate(rect(0, 0, L, Wd), w, zb, 'pr', { holes: [rect(w, w, L - w, Wd - w)] });              // printed walls
+      bosses.forEach(([x, y]) => { k.cyl(x, y, (w + zb) / 2, .24, zb - w, 'z', 'pr');
+        k.cyl(x, y, zb - .1, .1, .2, 'z', 'brass', { ex: [0, 0, .7] });                             // heat-set insert
+        k.cyl(x, y, z + .045, .15, .09, 'z', 'steel', { ex: [0, 0, 2.6] }); });                     // button-head screw
+      const holes = [rect(.75, .75, 3.25, 1.75), ...bosses.map(([x, y]) => ring(x, y, .065, 12)), ring(4.5, 1.25, .19), ...[1.25, 2].map(x => ring(x, 2.9, .12, 12)), ring(2.75, 2.9, .1, 12)];
+      k.plate(rect(0, 0, L, Wd), zb, z, 'alu', { holes, ex: [0, 0, 1.6] });                         // waterjet plate
+      k.plate(rect(.6, .6, 3.4, 1.9), zb - .125, zb, 'acr', { ex: [0, 0, 1.0] });                   // window behind the plate
+      k.cyl(4.5, 1.25, z + .22, .38, .45, 'z', 'knob', { ex: [0, 0, 2.2] });
+      [1.25, 2].forEach(x => { k.cyl(x, 2.9, z + .05, .16, .1, 'z', 'steel', { ex: [0, 0, 2.2] }); k.cyl(x, 2.9, z + .3, .035, .45, 'z', 'steel', { ex: [0, 0, 2.2] }); });
+      k.cyl(2.75, 2.9, z + .08, .1, .16, 'z', 'red', { ex: [0, 0, 2.2] });                          // LED
+    },
+    b5(k){ const L = 5.25, W = 3.375, H = 1.5, t = .125, ro = .25, ri = .125, tz0 = .41, tz1 = 1.46, tl = .6;
+      const arc = (cx, cz, r, a0, a1, n = 8) => Array.from({ length: n + 1 }, (_, i) => { const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180; return [cx + r * Math.cos(a), cz + r * Math.sin(a)]; });
+      const bend = [...arc(ro, ro, ro, 180, 270), ...arc(ro, ro, ri, 270, 180)], mir = (p, m) => p.map(([u, w]) => [m - u, w]);
+      k.box(ro, ro, 0, L - ro, W - ro, t, 'alu');                                                   // floor
+      k.slabX(bend, ro, L - ro, 'alu'); k.slabX(mir(bend, W), ro, L - ro, 'alu');                   // long bends
+      k.slab(bend, ro, W - ro, 'alu'); k.slab(mir(bend, L), ro, W - ro, 'alu');                     // end bends
+      k.box(0, 0, ro, L, t, H, 'alu'); k.box(0, W - t, ro, L, W, H, 'alu');                         // long walls
+      k.box(0, t, ro, t, W - t, H, 'alu'); k.box(L - t, t, ro, L, W - t, H, 'alu');                 // end walls
+      [[t, t + tl], [L - t - tl, L - t]].forEach(([a, b]) => { k.box(a, t, tz0, b, 2 * t, tz1, 'alu'); k.box(a, W - 2 * t, tz0, b, W - t, tz1, 'alu'); });  // corner tabs
+      [.46, L - .46].forEach(x => { k.cyl(x, W + .02, .94, .1, .04, 'y', 'steel', { ex: [0, .9, 0] }); k.cyl(x, -.02, .94, .1, .04, 'y', 'steel', { ex: [0, -.9, 0] }); });  // rivet heads
+      k.box(.2875, .2875, H - .125, L - .2875, W - .2875, H, 'wood', { ex: [0, 0, 1.5] });           // lid lip
+      k.box(0, 0, H, L, W, H + .125, 'wood2', { ex: [0, 0, 1.5] });                                  // lid
+    }
+  };
+
+  /* mode: 'drawer' (needs model.open) or 'explode'. slider: <input type=range 0..100>. */
+  async function mount(box, slider, id, mode){
+    stop();
+    if (!MODELS[id]) return;
+    let T; try { T = await import(THREE_URL); } catch { return; }          // offline: keep the SVG
+    if (!box.isConnected) return;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const W = () => box.clientWidth, H = () => Math.round(box.clientWidth * .78);
+    let r; try { r = new T.WebGLRenderer({ antialias: true, alpha: true }); } catch { return; }  // no WebGL: keep the SVG
+    r.setPixelRatio(Math.min(devicePixelRatio, 2)); r.setSize(W(), H());
+    const el = r.domElement;
+    el.setAttribute('role', 'img'); el.setAttribute('aria-label', 'Sample box 3D model. Drag to turn it.');
+    el.style.touchAction = 'pan-y'; el.style.cursor = 'grab'; el.style.display = 'block';
+    const scene = new T.Scene(), cam = new T.PerspectiveCamera(28, W() / H(), .1, 200);
+    scene.add(new T.HemisphereLight(0xffffff, 0x8a7a66, 1.7));
+    const sun = new T.DirectionalLight(0xffffff, 1.4); sun.position.set(4, 9, 6); scene.add(sun);
+
+    const k = kit(T), info = MODELS[id](k) || {}, g = new T.Group();
+    k.parts.forEach(p => g.add(p));
+    const set = v => k.parts.forEach(p => { const u = p.userData;
+      p.position.copy(u.base);
+      if (mode === 'drawer') { if (u.dr) p.position.z += info.open * v; }
+      else p.position.addScaledVector(u.ex, v); });
+    // fit the camera to the fully open/exploded model so nothing leaves the frame while sliding
+    const bb = new T.Box3(); set(0); bb.setFromObject(g); set(1); bb.union(new T.Box3().setFromObject(g));
+    const ctr = bb.getCenter(new T.Vector3()), rad = bb.getBoundingSphere(new T.Sphere()).radius;
+    g.position.copy(ctr).negate();
+    const spin = new T.Group(); spin.add(g); spin.rotation.set(.15, -.6, 0); scene.add(spin);
+    const fit = () => { const d = rad / Math.sin(cam.fov * Math.PI / 360) * (cam.aspect < 1 ? .95 / cam.aspect : .8); cam.position.set(0, d * .32, d * .95); cam.lookAt(0, 0, 0); };
+    fit();
+
+    const draw = () => r.render(scene, cam);
+    const onSlide = () => { set(slider.value / 100); draw(); };
+    slider.addEventListener('input', onSlide);
+    let drag = null, idle = !reduce, raf = 0, last = 0;
+    el.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, ry: spin.rotation.y, rx: spin.rotation.x }; idle = false; el.style.cursor = 'grabbing'; el.setPointerCapture(e.pointerId); });
+    el.addEventListener('pointermove', e => { if (!drag) return; spin.rotation.y = drag.ry + (e.clientX - drag.x) * .01; spin.rotation.x = Math.max(-.4, Math.min(1.2, drag.rx + (e.clientY - drag.y) * .006)); draw(); });
+    const up = () => { drag = null; el.style.cursor = 'grab'; }; el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    function tick(t){
+      if (!box.isConnected) return stop();
+      if (idle) { spin.rotation.y += Math.min(t - last, 50) * .00022; draw(); }
+      last = t; raf = requestAnimationFrame(tick);
+    }
+    const ro = new ResizeObserver(() => { r.setSize(W(), H()); cam.aspect = W() / H(); cam.updateProjectionMatrix(); fit(); draw(); });
+    box.replaceChildren(el); ro.observe(box);
+    const ctl = slider.closest('.v3dctl'); if (ctl) ctl.hidden = false;
+    onSlide(); raf = requestAnimationFrame(tick);
+    stop = () => { cancelAnimationFrame(raf); ro.disconnect(); scene.traverse(o => { if (o.geometry) o.geometry.dispose(); }); r.dispose(); stop = () => {}; };
+  }
+  return { mount, has: id => !!MODELS[id] };
+})();

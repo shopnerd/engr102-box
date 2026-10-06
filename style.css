@@ -43,6 +43,13 @@ main{padding-block:28px 60px;padding-inline:max(16px,4vw);max-width:1080px;margi
 .hero p{font-size:1.1rem;max-width:56ch}
 .hero .thumb{background:var(--sheet);border:1px solid var(--rule);padding:8px}
 .hero .thumb svg{width:100%;height:auto;display:block}
+.hero .thumb{margin:0}
+.v3dbox{position:relative}.v3dbox canvas{width:100%;user-select:none}
+.v3dctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:8px 4px 2px;font:600 .95rem var(--cond);letter-spacing:.08em;text-transform:uppercase}
+.v3dctl input{flex:1;min-width:140px;accent-color:var(--red);min-height:32px}
+.v3dctl .lm{flex-basis:100%;text-transform:none;letter-spacing:0;font-weight:400}
+.v3dctl[hidden]{display:none}
+.iso.v3d{background:var(--sheet);border:1px solid var(--rule);padding:8px}
 .spine{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px;padding:0;list-style:none;counter-reset:s}
 .spine li{font:500 .82rem var(--mono);border:1px solid var(--rule);background:var(--sheet);padding:4px 8px}
 .lessons{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
@@ -113,7 +120,7 @@ select,input[type=text],textarea{font:inherit;color:var(--ink);background:var(--
 .result{border:1.5px solid var(--ok);background:var(--okbg);padding:14px 16px;margin:16px 0}
 .result.fail{border-color:var(--red);background:var(--sheet)}
 .foot{border-top:1px solid var(--rule);padding:16px max(16px,4vw);font:400 .8rem var(--mono);color:var(--muted)}
-@media print{
+@media print{ .v3dctl{display:none!important}
   .bar,.draft,.foot,.noprint,.pager{display:none!important}
   body{background:#fff;color:#000}
   main{padding:0;max-width:none}

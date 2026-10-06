@@ -28,7 +28,11 @@ function home(){
       <ol class="spine" aria-label="Project steps"><li>Learn the rules</li><li>Design</li><li>Plan</li><li>Staff sign-off</li><li>Make</li><li>Document</li></ol>
       <div class="row" style="margin-top:14px"><a class="btn" href="#/lesson/${next.id}">${finished ? 'Continue' : 'Start'}: ${esc(next.title)}</a><a class="btn ghost" href="#/designs">Browse designs</a></div>
     </div>
-    <a class="thumb" href="#/design/b3" aria-label="Bandsaw box sample">${D3.b3()}</a>
+    <figure class="thumb v3d">
+      <div class="v3dbox" id="v3d">${D3.b3()}</div>
+      <div class="v3dctl" hidden><label for="v3ds">Drawer</label><input type="range" id="v3ds" min="0" max="100" value="35"><span class="lm">Drag the box to turn it</span></div>
+      <figcaption class="lm"><a href="#/design/b3">B3 bandsaw box with drawer</a></figcaption>
+    </figure>
   </section>
   <h2 style="margin-bottom:10px">Lessons <span class="pill">${finished} of ${total} done</span></h2>
   <ol class="lessons">${LESSONS.map((l, i) => { const d = done(l.id); return `<li><a href="#/lesson/${l.id}"><span class="ln">${i+1}</span><span><span class="lt">${esc(l.title)}</span><br><span class="lm">${esc(l.time)}</span></span><span class="pill ${d.n===d.of?'done':''}">${d.n===d.of?'Done':`${d.n}/${d.of}`}</span></a></li>`; }).join('')}</ol>`;
@@ -61,7 +65,9 @@ function design(id){
   <h1><span class="dno">${d.id.toUpperCase()}</span>${esc(d.name)}</h1>
   <p class="read" style="font-size:1.08rem">${escL(d.tag)} ${escL(d.how)}</p>
   <div class="chips">${d.mats.map(m=>`<span class="chip">${esc(m)}</span>`).join('')}<span class="chip">${esc(d.size)} in</span><span class="chip">${esc(d.time)}</span><span class="chip">${esc(d.level)}</span></div>
-  <figure class="iso"><div>${D3[d.id]()}</div><figcaption class="lm">Sample, three-quarter view</figcaption></figure>
+  <figure class="iso v3d"><div class="v3dbox" id="v3d">${D3[d.id]()}</div>
+    <div class="v3dctl" hidden><label for="v3ds">Explode</label><input type="range" id="v3ds" min="0" max="100" value="0"><span class="lm">Drag the box to turn it</span></div>
+    <figcaption class="lm">Sample, three-quarter view</figcaption></figure>
   <div class="dwg">${D[d.id]()}</div>
   <p class="lm">Dimensions in inches, ±1/32 unless noted. Draft. Build one before trusting every number.</p>
   <div class="two">
@@ -136,6 +142,8 @@ function route(){
 }
 
 function wire(a, b){
+  const v3 = $('#v3d');
+  if (v3) Box3D.mount(v3, $('#v3ds'), a === 'design' ? b : 'b3', a === 'design' ? 'explode' : 'drawer');
   if (a === 'lesson') {
     main.querySelectorAll('.check input').forEach(cb => cb.addEventListener('change', () => {
       const arr = S.checks[b] || []; arr[+cb.dataset.k] = cb.checked; S.checks[b] = arr; save();
