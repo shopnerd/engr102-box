@@ -87,7 +87,13 @@ D.b2=()=>{
   d.line(.25,-.15,.25,1.6,'ctr');
   d.note(.32,.25,.9,.9,'CLEARANCE 9/64 THRU SIDE');d.note(.4,.02,.9,.45,'COUNTERSINK 82°, HEAD FLUSH');d.note(.297,1.2,.9,1.35,'PILOT 3/32 × 1 DEEP, END GRAIN');
   d.text(1.25,.32,'SIDE','lbl');d.text(.25,1.85,'END','lbl');
-  return svg(1020,600,'B2 router-table pencil box: front view, top view, section A-A, screw detail',[f,t,s,d])};
+  const k=V(80,670,34);k.title(0,-.95,'ROUTED STRIP, INSIDE FACE: ROUT FIRST, THEN STAFF CUT');
+  k.rect(0,0,26,2.5,'wd');k.line(0,.25,26,.25,'hid');k.line(0,.375,26,.375,'hid');k.line(0,2.0,26,2.0,'hid');k.line(0,2.25,26,2.25,'hid');
+  [[0,2,'WASTE'],[2.125,11.125,'A  SIDE'],[11.25,20.25,'A  SIDE'],[20.375,22.375,'B'],[22.5,24.5,'C'],[24.5,26,'']].forEach(([a,b,m],i)=>{if(i)k.line(a-.0625,-.15,a-.0625,2.65,'cutl');k.text((a+b)/2,1.33,m)});
+  k.line(22.5,.375,24.5,.375,'cut');k.circ(23.5,.375,.06,'dot');k.line(23.5,.375,23.5,-.6,'ldr');k.line(23.5,-.6,23.2,-.6,'ldr');k.text(23.1,-.5,'RIP C TO 2.12, GROOVE COMES OFF','lbl','end');
+  k.dimH(2.125,11.125,2.5,2.95,'9.00');k.dimH(20.375,22.375,2.5,2.95,'2.00');k.dimH(0,26,2.5,3.7,'26.00');
+  k.note(7,.31,7.4,-.55,'LID GROOVE, WHOLE LENGTH');k.note(13,2.12,13.4,3.25,'BOTTOM DADO, WHOLE LENGTH');
+  return svg(1020,800,'B2 router-table pencil box: front view, top view, section A-A, screw detail, routed strip cut list',[f,t,s,d,k])};
 
 D.b3=()=>{
   const H=3.5,fl=pts=>pts.map(([x,z])=>[x,H-z]);
