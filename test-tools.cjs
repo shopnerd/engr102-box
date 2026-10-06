@@ -1,7 +1,7 @@
 // node test-tools.cjs : box designer → DXF → file checker round trip
 const fs=require('fs'),vm=require('vm');const ctx={console,Math,esc:s=>s};vm.createContext(ctx);
-for(const f of ['boxgen.js','audit.js'])vm.runInContext(fs.readFileSync(f,'utf8')+'\nthis.BoxGen=typeof BoxGen!=="undefined"?BoxGen:this.BoxGen;this.Audit=typeof Audit!=="undefined"?Audit:this.Audit;',ctx);
-const {BoxGen,Audit}=ctx;let fail=0;const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)fail++};
+for(const f of ['boxgen.js','audit.js','fold.js'])vm.runInContext(fs.readFileSync(f,'utf8')+'\nfor(const n of ["BoxGen","Audit","FoldGen"])try{this[n]=eval(n)}catch{}',ctx);
+const {BoxGen,Audit,FoldGen}=ctx;let fail=0;const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)fail++};
 for(const top of ['closed','open','lid']){
   const o={L:4,W:3,H:2,t:.125,kerf:0,finger:.5,inside:false,top,text:'HI'};
   const b=BoxGen.build(o);
@@ -38,6 +38,18 @@ const g=Audit.parseDXF(circ);const pts=g.polys[0].pts;const rr=pts.map(p=>Math.h
     const d=BoxGen.dxf(BoxGen.placed(lay_),sw,sh);
     const res=Audit.run({name:name+'.dxf'},d,{machine:{kind:'laser',name:'laser',bed:[32,18],maxT:.25,pierce:.2,capMin:15},material:'acrylic',t:.125,stock:[sw,sh],speed:.4,assumeMM:false},null);
     res.R.forEach(x=>console.log('   ',x.lvl,x.msg));ok(!res.R.some(x=>x.lvl==='fail'),`T-slot ${name} DXF passes the checker`);
+  }
+}
+// fold designer: B5 numbers reproduce the drawn blank and finger plan; DXFs pass the waterjet checker; known bad cases fail
+{
+  const b5=FoldGen.plan({L:5.25,W:3.375,H:1.5,t:.125,corners:'tabs',tl:.6});
+  ok(Math.abs(b5.Ln-7.8)<.01&&Math.abs(b5.Wn-5.925)<.01,`B5 blank ${b5.Ln.toFixed(3)} x ${b5.Wn.toFixed(3)} matches the drawing (7.80 x 5.93)`);
+  const fs_=b5.steps.filter(s=>s.set).map(s=>s.k+':'+s.set.s).join(' ');ok(fs_==='tabs:1 ends:2 longs:3',`B5 finger plan ${fs_} matches the written steps (1, 2, 3 in)`);
+  const wj={machine:{kind:'waterjet',name:'waterjet',bed:[48,48],maxT:2,pierce:3,capMin:10},material:'aluminum',t:.125,stock:[24,12],speed:.5,assumeMM:false};
+  for(const [name,o,expectFail] of [['tray',{},false],['open',{corners:'open',t:.0625,L:6,W:4},false],['narrow',{L:5,W:1.5,H:1},true],['wide tabs',{L:4,W:3,tl:1.5},true],['long 1/8',{L:9,W:4,H:1},true]]){
+    const p=FoldGen.plan(o),fails=p.issues.filter(i=>i.lvl==='fail').map(i=>i.title);
+    ok(!!fails.length===expectFail,`fold ${name}: ${fails.length?fails.join('; '):'works'}`);
+    const r=Audit.run({name:'fold.dxf'},FoldGen.dxf(p),wj,null);ok(!r.R.some(x=>x.lvl==='fail'),`fold ${name} DXF passes the waterjet checker`);
   }
 }
 process.exit(fail?1:0);

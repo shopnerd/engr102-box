@@ -14,7 +14,7 @@ const Box3D = (() => {
     const ink = new T.LineBasicMaterial({ color: css('--ink'), transparent: true, opacity: .8 });
     const std = (c, o = {}) => new T.MeshStandardMaterial(Object.assign({ color: css(c), roughness: .85, metalness: 0, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1, side: T.DoubleSide }, o));
     const M = { wood: std('--wood'), wood2: std('--wood2'), wood3: std('--wood3'), cav: std('--cav'), pr: std('--print', { roughness: .6 }),
-      alu: std('--alu', { roughness: .35, metalness: .55 }), steel: std('--alu2', { roughness: .3, metalness: .7 }), brass: new T.MeshStandardMaterial({ color: '#C9A13B', roughness: .3, metalness: .8 }),
+      alu: std('--alu', { roughness: .35, metalness: .55 }), bad: std('--red', { roughness: .45, metalness: .2 }), steel: std('--alu2', { roughness: .3, metalness: .7 }), brass: new T.MeshStandardMaterial({ color: '#C9A13B', roughness: .3, metalness: .8 }),
       acr: std('--acr', { transparent: true, opacity: .55, roughness: .15, depthWrite: false }), red: std('--red', { roughness: .4 }), knob: std('--ink', { roughness: .5 }) };
     const parts = [], V2 = p => p.map(([a, b]) => new T.Vector2(a, b));
     const shape = (pts, holes = []) => { const s = new T.Shape(V2(pts)); holes.forEach(h => s.holes.push(new T.Path(V2(h)))); return s; };
@@ -66,19 +66,24 @@ const Box3D = (() => {
       k.box(0, W - t, 0, L, W, H, 'wood', { ex: [0, 1.4, 0] });                                     // front outer
       k.box(t + .01, t + .015, s0, L, W - t - .015, s1, 'acr', { ex: [2.2, 0, .9] });               // lid slides out the end
     },
-    b2(k){ const L = 9, W = 3, H = 2.5, t = .5, g0 = 2.125, g1 = 2.25, cs = .07, rC = .135, rH = .07, rP = .047;
-      const at = [[.25, .75], [.25, 1.75], [L - .25, .75], [L - .25, 1.75]], side = rect(0, 0, L, H);
-      // side = countersink layer + clearance-hole layer. Ends stay put; sides and screws slide straight out so they line up.
-      const sideWithHoles = (face, dir) => { const ex = [0, -dir * 1.7, 0], inner = face + dir * cs, far = face + dir * t;
-        k.slab(side, Math.min(face, inner), Math.max(face, inner), 'wood', { holes: at.map(([x, z]) => ring(x, z, rC, 20)), ex });
-        k.slab(side, Math.min(inner, far), Math.max(inner, far), 'wood', { holes: at.map(([x, z]) => ring(x, z, rH, 16)), ex });
-        at.forEach(([x, z]) => { k.csink(x, face, z, rC, rH, cs, dir, 'wood3', { ex }); k.screw(x, face, z, dir, { ex: [0, -dir * 3.4, 0] }); });
+    b2(k){ const L = 9, W = 3, H = 2.5, t = .5, g0 = 2.125, g1 = 2.25, cs = .07, rC = .135, rH = .07, rP = .047, dd = .25, gd = .1875;
+      const at = [[.25, .75], [.25, 1.75], [L - .25, .75], [L - .25, 1.75]];
+      // inner-face profile [depth from the outer face, z]: bottom dado 1/4 × 1/4 at 1/4 up, lid groove 1/8 × 3/16 at 1/4 down
+      const grooved = (d0, top, groove) => [[d0, 0], [t, 0], [t, .25], [t - dd, .25], [t - dd, .5], [t, .5],
+        ...(groove ? [[t, g0], [t - gd, g0], [t - gd, g1], [t, g1]] : []), [t, top], [d0, top]];
+      // side = thin countersink layer with holes + grooved body. Ends stay put; sides and screws slide straight out so they line up.
+      const side = (face, dir) => { const ex = [0, -dir * 1.7, 0], Y = d => face + dir * d;
+        k.slab(rect(0, 0, L, H), Math.min(Y(0), Y(cs)), Math.max(Y(0), Y(cs)), 'wood', { holes: at.map(([x, z]) => ring(x, z, rC, 20)), ex });
+        k.slabX(grooved(cs, H, true).map(([d, z]) => [Y(d), z]), 0, L, 'wood', { ex });
+        at.forEach(([x, z]) => { k.csink(x, Y(0), z, rC, rH, cs, dir, 'wood3', { ex }); k.disc(x, Y(cs) - dir * .002, z, rH, -dir, { ex }); k.disc(x, Y(t) + dir * .002, z, rH, dir, { ex });
+          k.screw(x, Y(0), z, dir, { ex: [0, -dir * 3.4, 0] }); });
       };
-      k.box(t, t, .25, L - t, W - t, .5, 'wood2', { ex: [0, 0, -1.1] });                            // ply bottom in the dado
-      sideWithHoles(0, 1); sideWithHoles(W, -1);
-      k.box(0, t, 0, t, W - t, H, 'wood'); k.box(L - t, t, 0, L, W - t, g0, 'wood');                // ends
+      side(0, 1); side(W, -1);
+      k.slab(grooved(0, H, true), t, W - t, 'wood');                                                // closed end, dado + lid groove
+      k.slab(grooved(0, g0, false).map(([d, z]) => [L - d, z]), t, W - t, 'wood');                  // lid-exit end, dado only
       at.forEach(([x, z]) => { k.disc(x, t - .002, z, rP, -1); k.disc(x, W - t + .002, z, rP, 1); }); // pilot holes in the end grain
-      k.box(.34, .33, g0, L, W - .33, g1, 'acr', { ex: [2.4, 0, 1.2] });
+      k.box(t - dd + .03, t - dd + .03, .25, L - t + dd - .03, W - t + dd - .03, .5, 'wood2', { ex: [0, 0, -1.1] });  // 1/4 ply bottom in the dados
+      k.box(t - gd + .03, t - gd + .02, g0, L, W - t + gd - .02, g1, 'acr', { ex: [2.4, 0, 1.2] });  // lid in the groove
     },
     b3(k){ const D = 3.5, f = B3.foot;
       k.slab(B3.outer, 0, .25, 'wood2', { ex: [0, -1.6, 0] });                                      // back slice
@@ -103,55 +108,64 @@ const Box3D = (() => {
       [1.25, 2].forEach(x => { k.cyl(x, 2.9, z + .05, .16, .1, 'z', 'steel', { ex: [0, 0, 2.2] }); k.cyl(x, 2.9, z + .3, .035, .45, 'z', 'steel', { ex: [0, 0, 2.2] }); });
       k.cyl(2.75, 2.9, z + .08, .1, .16, 'z', 'red', { ex: [0, 0, 2.2] });                          // LED
     },
-    b5(k){ const T = k.T, L = 5.25, W = 3.375, H = 1.5, t = .125, ro = .25, ri = .125, tz0 = .41, tz1 = 1.46, tl = .6;
-      // Slider: lid lifts and rivets pull, then the blank unfolds in reverse build order: long walls, end walls, tabs.
-      // Works in three's frame (X right, Y up, Z front). Each wall hangs off a floor edge through a bend whose neutral
-      // length stays constant, so the flat state comes out at the real blank size.
-      const rn = ri + t / 2, s = rn * Math.PI / 2, Lw = H - ro, root = k.raw(new T.Group());
-      const boxG = (x0, x1, y0, y1, z0, z1) => new T.BoxGeometry(x1 - x0, y1 - y0, z1 - z0).translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
-      const holeDisc = (x, y, z, up) => { const g = new T.CircleGeometry(.08, 16); g.rotateX(up ? -Math.PI / 2 : Math.PI / 2); const o = k.mk(g, 'cav', 0); o.position.set(x, y, z); return o; };
-      root.add(k.mk(boxG(ro, L - ro, 0, t, ro, W - ro), 'alu'));                                  // floor
-      const bendPts = th => { const kap = Math.max(th, 1e-4) / s, out = [], inn = [];
-        for (let i = 0; i <= 12; i++) { const f = kap * s * i / 12, pz = Math.sin(f) / kap, py = (1 - Math.cos(f)) / kap, cz = -Math.sin(f), cy = Math.cos(f);
-          out.push([pz - cz * t / 2, py - cy * t / 2]); inn.push([pz + cz * t / 2, py + cy * t / 2]); }
-        return { pts: [...out, ...inn.reverse()], end: [Math.sin(kap * s) / kap, (1 - Math.cos(kap * s)) / kap] }; };
-      // hinge frame: local X along the edge, Z outward from the floor, Y up (the inside face)
-      const flap = (px, pz, rotY, bl, wl) => {
-        const h = new T.Group(); h.position.set(px, t / 2, pz); h.rotation.y = rotY; root.add(h);
-        const bend = new T.Mesh(new T.BufferGeometry(), k.M.alu), bE = new T.LineSegments(new T.BufferGeometry(), k.ink); bend.add(bE); h.add(bend);
-        const wall = new T.Group(); h.add(wall); wall.add(k.mk(boxG(-wl / 2, wl / 2, -t / 2, t / 2, 0, Lw), 'alu'));
-        return { wall, set(th){ const b = bendPts(th), g = new T.ExtrudeGeometry(new T.Shape(b.pts.map(([a, c]) => new T.Vector2(a, c))), { depth: bl, bevelEnabled: false });
-          g.rotateY(-Math.PI / 2); g.translate(bl / 2, 0, 0);
-          bend.geometry.dispose(); bend.geometry = g; bE.geometry.dispose(); bE.geometry = new T.EdgesGeometry(g, 25);
-          wall.position.set(0, b.end[1], b.end[0]); wall.rotation.x = -th; } };
-      };
-      const longs = [flap(L / 2, ro, Math.PI, L - 2 * ro, L), flap(L / 2, W - ro, 0, L - 2 * ro, L)];
-      const ends = [flap(ro, W / 2, -Math.PI / 2, W - 2 * ro, W - 2 * t), flap(L - ro, W / 2, Math.PI / 2, W - 2 * ro, W - 2 * t)];
-      const hw = (W - 2 * t) / 2, rz = .94 - ro, rx = L / 2 - .46, tabs = [], rivets = [];
-      ends.forEach(e => [1, -1].forEach(sg => {                                                   // corner tabs fold off the end walls
-        const tg = new T.Group(); tg.position.set(sg * hw, -t / 2, 0); e.wall.add(tg);
-        tg.add(k.mk(boxG(sg > 0 ? 0 : -tl, sg > 0 ? tl : 0, 0, t, tz0 - ro, tz1 - ro), 'alu'));
-        tg.add(holeDisc(sg * (.46 - t), -.002, rz, false), holeDisc(sg * (.46 - t), t + .002, rz, true));
-        tabs.push([tg, sg]); }));
-      longs.forEach(l => [1, -1].forEach(sg => {                                                  // rivet holes + pop rivets, head outside
-        l.wall.add(holeDisc(sg * rx, -t / 2 - .002, rz, false), holeDisc(sg * rx, t / 2 + .002, rz, true));
-        const r = new T.Group(); r.position.set(sg * rx, 0, rz);
-        r.add(k.mk(new T.CylinderGeometry(.155, .155, .04, 20).translate(0, -t / 2 - .02, 0), 'steel'), k.mk(new T.CylinderGeometry(.078, .078, .32, 14).translate(0, .1, 0), 'steel'));
-        l.wall.add(r); rivets.push(r); }));
-      const lid = new T.Group(); root.add(lid);
-      lid.add(k.mk(boxG(.2875, L - .2875, H - .125, H, .2875, W - .2875), 'wood'), k.mk(boxG(0, L, H, H + .125, 0, W), 'wood2'));
-      const sm = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }, Q = Math.PI / 2;
-      return { update(v){
-        const p1 = sm(v / .3), pl = sm((v - .3) / .3), pe = sm((v - .55) / .3), pt = sm((v - .8) / .2);
-        lid.position.y = 2 * p1; rivets.forEach(r => r.position.y = -.9 * p1);
-        longs.forEach(l => l.set(Q * (1 - pl))); ends.forEach(e => e.set(Q * (1 - pe)));
-        tabs.forEach(([tg, sg]) => tg.rotation.z = sg * Q * (1 - pt));
-      } };
-    }
+    b5: k => foldModel(k, { L: 5.25, W: 3.375, H: 1.5, t: .125, ri: .125, K: .5, tabs: true, tl: .6, tz0: .41, tz1: 1.46, a: .335, rivets: true, lid: true }),
+    fold: (k, o) => foldModel(k, o.P)                                                              // fold designer
   };
 
-  /* mode: 'drawer' (needs model.open) or 'explode'. slider: <input type=range 0..100>. */
-  async function mount(box, slider, id, mode){
+  /* Folded tray, shared by B5 and the fold designer. P: L W H t ri K tabs tl tz0 tz1 a rivets lid bad{tabs,ends,longs}.
+     update(v): v = 0 folded, 1 flat. Unfold order is the build order backwards: (lid + rivets), long walls, end walls, tabs.
+     Works in three's frame (X right, Y up, Z front). Each wall hangs off a floor edge through a bend whose neutral
+     length stays constant, so the flat state comes out at the real blank size. */
+  function foldModel(k, P){
+    const T = k.T, { L, W, H, t, ri, tl, tz0, tz1 } = P, ro = ri + t, rn = ri + (P.K ?? .4) * t, s = rn * Math.PI / 2, Lw = H - ro, root = k.raw(new T.Group());
+    const boxG = (x0, x1, y0, y1, z0, z1) => new T.BoxGeometry(x1 - x0, y1 - y0, z1 - z0).translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+    const holeDisc = (x, y, z, up) => { const g = new T.CircleGeometry(.08, 16); g.rotateX(up ? -Math.PI / 2 : Math.PI / 2); const o = k.mk(g, 'cav', 0); o.position.set(x, y, z); return o; };
+    const bad = P.bad || {}, mat = b => b ? 'bad' : 'alu';
+    root.add(k.mk(boxG(ro, L - ro, 0, t, ro, W - ro), 'alu'));                                    // floor
+    const bendPts = th => { const kap = Math.max(th, 1e-4) / s, out = [], inn = [];
+      for (let i = 0; i <= 12; i++) { const f = kap * s * i / 12, pz = Math.sin(f) / kap, py = (1 - Math.cos(f)) / kap, cz = -Math.sin(f), cy = Math.cos(f);
+        out.push([pz - cz * t / 2, py - cy * t / 2]); inn.push([pz + cz * t / 2, py + cy * t / 2]); }
+      return { pts: [...out, ...inn.reverse()], end: [Math.sin(kap * s) / kap, (1 - Math.cos(kap * s)) / kap] }; };
+    // hinge frame: local X along the edge, Z outward from the floor, Y up (the inside face)
+    const flap = (px, pz, rotY, bl, wl, m) => {
+      const h = new T.Group(); h.position.set(px, t / 2, pz); h.rotation.y = rotY; root.add(h);
+      const bend = new T.Mesh(new T.BufferGeometry(), k.M[m]), bE = new T.LineSegments(new T.BufferGeometry(), k.ink); bend.add(bE); h.add(bend);
+      const wall = new T.Group(); h.add(wall); wall.add(k.mk(boxG(-wl / 2, wl / 2, -t / 2, t / 2, 0, Lw), m));
+      return { wall, set(th){ const b = bendPts(th), g = new T.ExtrudeGeometry(new T.Shape(b.pts.map(([a, c]) => new T.Vector2(a, c))), { depth: bl, bevelEnabled: false });
+        g.rotateY(-Math.PI / 2); g.translate(bl / 2, 0, 0);
+        bend.geometry.dispose(); bend.geometry = g; bE.geometry.dispose(); bE.geometry = new T.EdgesGeometry(g, 25);
+        wall.position.set(0, b.end[1], b.end[0]); wall.rotation.x = -th; } };
+    };
+    const longs = [flap(L / 2, ro, Math.PI, L - 2 * ro, L, mat(bad.longs)), flap(L / 2, W - ro, 0, L - 2 * ro, L, mat(bad.longs))];
+    const ends = [flap(ro, W / 2, -Math.PI / 2, W - 2 * ro, W - 2 * t, mat(bad.ends)), flap(L - ro, W / 2, Math.PI / 2, W - 2 * ro, W - 2 * t, mat(bad.ends))];
+    const hw = (W - 2 * t) / 2, a = P.a ?? .35, rz = (tz0 + tz1) / 2 - ro, rx = L / 2 - t - a, tabs = [], rivets = [];
+    if (P.tabs) ends.forEach(e => [1, -1].forEach(sg => {                                         // corner tabs fold off the end walls
+      const tg = new T.Group(); tg.position.set(sg * hw, -t / 2, 0); e.wall.add(tg);
+      tg.add(k.mk(boxG(sg > 0 ? 0 : -tl, sg > 0 ? tl : 0, 0, t, tz0 - ro, tz1 - ro), mat(bad.tabs)));
+      if (P.rivets) tg.add(holeDisc(sg * a, -.002, rz, false), holeDisc(sg * a, t + .002, rz, true));
+      tabs.push([tg, sg]); }));
+    if (P.tabs && P.rivets) longs.forEach(l => [1, -1].forEach(sg => {                            // rivet holes + pop rivets, head outside
+      l.wall.add(holeDisc(sg * rx, -t / 2 - .002, rz, false), holeDisc(sg * rx, t / 2 + .002, rz, true));
+      const r = new T.Group(); r.position.set(sg * rx, 0, rz);
+      r.add(k.mk(new T.CylinderGeometry(.155, .155, .04, 20).translate(0, -t / 2 - .02, 0), 'steel'), k.mk(new T.CylinderGeometry(.078, .078, 2 * t + .07, 14).translate(0, t / 2 + .035, 0), 'steel'));
+      l.wall.add(r); rivets.push(r); }));
+    let lid = null;
+    if (P.lid){ lid = new T.Group(); root.add(lid);
+      lid.add(k.mk(boxG(.2875, L - .2875, H - .125, H, .2875, W - .2875), 'wood'), k.mk(boxG(0, L, H, H + .125, 0, W), 'wood2')); }
+    const phases = [...(lid || rivets.length ? ['rivets'] : []), 'longs', 'ends', ...(tabs.length ? ['tabs'] : [])], N = phases.length;
+    const sm = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }, Q = Math.PI / 2;
+    const at = (name, v) => { const i = phases.indexOf(name); return i < 0 ? 0 : sm((v - i / N) * N * 1.08); };
+    return { phases, update(v){
+      const p1 = at('rivets', v), pl = at('longs', v), pe = at('ends', v), pt = at('tabs', v);
+      if (lid) lid.position.y = 2 * p1; rivets.forEach(r => { r.position.y = -.9 * p1; r.visible = pl < .01; });   // rivets leave once the walls move
+      longs.forEach(l => l.set(Q * (1 - pl))); ends.forEach(e => e.set(Q * (1 - pe)));
+      tabs.forEach(([tg, sg]) => tg.rotation.z = sg * Q * (1 - pt));
+    } };
+  }
+
+  /* mode: 'drawer' (needs model.open), 'explode', or 'fold' (slider 0 = flat, 100 = folded). slider: <input type=range 0..100>.
+     opts.P: fold designer params; opts.rot: {x, y, idle} kept across remounts. Resolves to the model info (phases). */
+  async function mount(box, slider, id, mode, opts = {}){
     stop();
     if (!MODELS[id]) return;
     let T; try { T = await import(THREE_URL); } catch { return; }          // offline: keep the SVG
@@ -167,38 +181,40 @@ const Box3D = (() => {
     scene.add(new T.HemisphereLight(0xffffff, 0x8a7a66, 1.7));
     const sun = new T.DirectionalLight(0xffffff, 1.4); sun.position.set(4, 9, 6); scene.add(sun);
 
-    const k = kit(T), info = MODELS[id](k) || {}, g = new T.Group();
+    const k = kit(T), info = MODELS[id](k, opts) || {}, g = new T.Group();
     k.parts.forEach(p => g.add(p)); k.extras.forEach(o => g.add(o));
     const set = v => { k.parts.forEach(p => { const u = p.userData;
       p.position.copy(u.base);
       if (mode === 'drawer') { if (u.dr) p.position.z += info.open * v; }
       else p.position.addScaledVector(u.ex, v); });
-      if (mode !== 'drawer' && info.update) info.update(v); };
+      if (mode === 'fold') info.update(1 - v); else if (mode !== 'drawer' && info.update) info.update(v); };
     // fit the camera to the fully open/exploded model so nothing leaves the frame while sliding
     const bb = new T.Box3(); set(0); bb.setFromObject(g); set(1); bb.union(new T.Box3().setFromObject(g));
     const ctr = bb.getCenter(new T.Vector3()), rad = bb.getBoundingSphere(new T.Sphere()).radius;
     g.position.copy(ctr).negate();
-    const spin = new T.Group(); spin.add(g); spin.rotation.set(.15, -.6, 0); scene.add(spin);
+    const rot = opts.rot || { x: .15, y: -.6, idle: true }, spin = new T.Group(); spin.add(g); spin.rotation.set(rot.x, rot.y, 0); scene.add(spin);
     const fit = () => { const d = rad / Math.sin(cam.fov * Math.PI / 360) * (cam.aspect < 1 ? .95 / cam.aspect : .8); cam.position.set(0, d * .32, d * .95); cam.lookAt(0, 0, 0); };
     fit();
 
     const draw = () => r.render(scene, cam);
     const onSlide = () => { set(slider.value / 100); draw(); };
     slider.addEventListener('input', onSlide);
-    let drag = null, idle = !reduce, raf = 0, last = 0;
-    el.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, ry: spin.rotation.y, rx: spin.rotation.x }; idle = false; el.style.cursor = 'grabbing'; el.setPointerCapture(e.pointerId); });
-    el.addEventListener('pointermove', e => { if (!drag) return; spin.rotation.y = drag.ry + (e.clientX - drag.x) * .01; spin.rotation.x = Math.max(-.4, Math.min(1.2, drag.rx + (e.clientY - drag.y) * .006)); draw(); });
+    let drag = null, idle = !reduce && rot.idle !== false, raf = 0, last = 0;
+    const keep = () => { rot.x = spin.rotation.x; rot.y = spin.rotation.y; rot.idle = idle; };
+    el.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, ry: spin.rotation.y, rx: spin.rotation.x }; idle = false; keep(); el.style.cursor = 'grabbing'; el.setPointerCapture(e.pointerId); });
+    el.addEventListener('pointermove', e => { if (!drag) return; spin.rotation.y = drag.ry + (e.clientX - drag.x) * .01; spin.rotation.x = Math.max(-.4, Math.min(1.2, drag.rx + (e.clientY - drag.y) * .006)); keep(); draw(); });
     const up = () => { drag = null; el.style.cursor = 'grab'; }; el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
     function tick(t){
       if (!box.isConnected) return stop();
-      if (idle) { spin.rotation.y += Math.min(t - last, 50) * .00022; draw(); }
+      if (idle) { spin.rotation.y += Math.min(t - last, 50) * .00022; keep(); draw(); }
       last = t; raf = requestAnimationFrame(tick);
     }
     const ro = new ResizeObserver(() => { r.setSize(W(), H()); cam.aspect = W() / H(); cam.updateProjectionMatrix(); fit(); draw(); });
     box.replaceChildren(el); ro.observe(box);
     const ctl = slider.closest('.v3dctl'); if (ctl) ctl.hidden = false;
     onSlide(); raf = requestAnimationFrame(tick);
-    stop = () => { cancelAnimationFrame(raf); ro.disconnect(); scene.traverse(o => { if (o.geometry) o.geometry.dispose(); }); r.dispose(); stop = () => {}; };
+    return info;
+    stop = () => { cancelAnimationFrame(raf); ro.disconnect(); slider.removeEventListener('input', onSlide); scene.traverse(o => { if (o.geometry) o.geometry.dispose(); }); r.dispose(); stop = () => {}; };
   }
   return { mount, has: id => !!MODELS[id] };
 })();

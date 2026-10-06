@@ -86,7 +86,7 @@ summary{font:600 1.1rem var(--cond);letter-spacing:.04em;padding:10px 0;cursor:p
 .pcard{background:var(--sheet);border:1px solid var(--rule);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .pcard p{margin:0;flex:1}
 .picker{display:grid;gap:8px;max-width:440px}
-select,input[type=text],textarea{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--muted);padding:9px 10px;border-radius:2px;width:100%;min-height:44px}
+select,input[type=text],input[type=number],textarea{min-width:0;font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--muted);padding:9px 10px;border-radius:2px;width:100%;min-height:44px}
 .pkout{font-weight:500;min-height:1.5em}
 /* designs */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:18px}
@@ -120,7 +120,16 @@ select,input[type=text],textarea{font:inherit;color:var(--ink);background:var(--
 .result{border:1.5px solid var(--ok);background:var(--okbg);padding:14px 16px;margin:16px 0}
 .result.fail{border-color:var(--red);background:var(--sheet)}
 .foot{border-top:1px solid var(--rule);padding:16px max(16px,4vw);font:400 .8rem var(--mono);color:var(--muted)}
-@media print{ .v3dctl{display:none!important}
+.btn.sm{min-height:34px;padding:6px 10px;font-size:.85rem}
+.brakeset{margin-top:12px}.brakeset summary{cursor:pointer;font:600 .9rem var(--cond);letter-spacing:.08em;text-transform:uppercase}
+.foldsteps{padding-left:1.4em;display:grid;gap:12px}
+.foldsteps li{background:var(--sheet);border:1px solid var(--rule);padding:10px 14px}
+.foldsteps li h3{margin:0 0 4px;color:var(--ink)}.foldsteps li p{margin:4px 0}
+.foldsteps li.now{border-color:var(--dimc);box-shadow:inset 4px 0 0 var(--dimc)}
+.foldsteps li.bad{border-color:var(--red)}
+.fsv svg{width:100%;max-width:740px;height:auto;display:block;margin-top:6px}
+.warnz{fill:#E8A33D;fill-opacity:.55}
+@media print{ .v3d,.brakeset{display:none!important} .v3dctl{display:none!important}
   .bar,.draft,.foot,.noprint,.pager{display:none!important}
   body{background:#fff;color:#000}
   main{padding:0;max-width:none}

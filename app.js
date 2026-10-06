@@ -75,6 +75,7 @@ function design(id){
       <h3>Make it yours</h3><ul>${d.yours.map(y=>`<li>${escL(y)}</li>`).join('')}</ul></div>
     <div><h3>Build steps</h3><ol>${d.steps.map(s=>`<li>${escL(s)}</li>`).join('')}</ol>
       ${d.id === 'b4' ? `<p class="row noprint"><a class="btn ghost" href="${SITE.boxStudio}" target="_blank" rel="noopener">Open Box Studio</a></p>` : ''}
+      ${d.id === 'b5' ? `<p class="row noprint"><a class="btn ghost" href="#/tools/fold">Design your own in the fold designer</a></p>` : ''}
       ${d.files ? `<h3>Cut files</h3><p class="row noprint"><button class="btn ghost" id="dl-walls" type="button">Walls DXF (acrylic, 12 × 12)</button><button class="btn ghost" id="dl-plates" type="button">Base and lid DXF (12 × 24)</button></p><p class="lm">Drawn for 3 mm (.118) acrylic with the material outline included. Bolted option: T-slots and screw holes are in the files.</p>` : ''}
       <p class="row noprint" style="margin-top:16px"><button class="btn" id="usedesign">Use this design in my plan</button></p></div>
   </div>`;
@@ -133,6 +134,7 @@ function route(){
   else if (a === 'check') { html = check(); nav = 'check'; }
   else if (a === 'tools' && b === 'box') { html = boxTool(); nav = 'box'; }
   else if (a === 'tools' && b === 'check') { html = checkTool(); nav = 'audit'; }
+  else if (a === 'tools' && b === 'fold') { html = foldTool(); nav = 'fold'; }
   else html = notFound();
   main.innerHTML = html;
   document.querySelectorAll('[data-nav]').forEach(n => { if (n.dataset.nav === nav) n.setAttribute('aria-current','page'); else n.removeAttribute('aria-current'); });
@@ -162,6 +164,7 @@ function wire(a, b){
   const cp = $('#copyprompt');
   if (cp) cp.addEventListener('click', () => { const t = $('#aiprompt').textContent; Promise.resolve().then(() => navigator.clipboard.writeText(t)).then(() => cp.textContent = 'Copied', () => { const r = document.createRange(); r.selectNodeContents($('#aiprompt')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); cp.textContent = 'Selected. Press Ctrl+C'; }); });
   if (a === 'tools' && b === 'box') wireBox();
+  if (a === 'tools' && b === 'fold') wireFold();
   if (a === 'tools' && b === 'check') wireCheck();
   if (a === 'design') {
     const u = $('#usedesign');

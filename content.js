@@ -109,6 +109,7 @@ const LESSONS = [
 <h3>Pick a tool</h3>
 <div class="tw"><table>
 <tr><th>Tool</th><th>Good for</th></tr>
+<tr><td><a href="#/tools/fold">Fold designer</a></td><td>Folded aluminum trays for the finger brake. Gives the flat pattern DXF, the bend order and the finger setup for each bend, and warns you about bends the brake can't make. Built into this guide.</td></tr>
 <tr><td><a href="#/tools/box">Laser box designer</a></td><td>Finger-jointed laser boxes from a few numbers. Built into this guide. Gives a DXF and SVG with the material outline included.</td></tr>
 <tr><td><a href="${SITE.boxStudio}" target="_blank" rel="noopener">Box Studio</a></td><td>The BFMS box designer for electronics. Gives you a 3D printed base with bosses for heat-set inserts and a flat face plate for the waterjet or laser. Required for the instrument-panel box.</td></tr>
 <tr><td><a href="https://www.onshape.com/en/education" target="_blank" rel="noopener">Onshape</a></td><td>Real CAD in the browser on any laptop. Free for students.</td></tr>
